@@ -1,52 +1,48 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import Greet from "./components/Greet.vue";
+import { onBeforeMount, onMounted, ref } from "vue";
+import Live2d from "./components/Live2d.vue";
+import MMD from "./components/mmd/MMD.vue"
+import { listen } from "@tauri-apps/api/event";
+import { join, resourceDir } from "@tauri-apps/api/path";
+import { Store } from "tauri-plugin-store-api";
+
+const isMMD = ref()
+
+async function getIsMMD() {
+  const resourceDirPath = await resourceDir();
+  const path = await join(resourceDirPath, 'data', 'data_settings.json');
+  console.log("path: ", path);
+  const store = new Store(path);
+  isMMD.value = await store.get("is_mmd") as boolean
+}
+async function listenEvents() {
+  await listen('event_is_mmd', (event: any) => {
+    console.log("event_is_mmd: ", event.payload as boolean);
+    isMMD.value = event.payload as boolean
+    location.reload()
+  });
+}
+
+onBeforeMount(() => {
+  getIsMMD()
+})
+
+onMounted(() => {
+  console.log("App onMounted");
+  listenEvents()
+})
 </script>
 
 <template>
-  <div class="container">
-    <h1>Welcome to Tauri!</h1>
+  <Suspense>
+    <Live2d v-if="!isMMD" />
+    <MMD v-else/>
 
-    <div class="row">
-      <a href="https://vitejs.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
-
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
-
-    <p>
-      Recommended IDE setup:
-      <a href="https://code.visualstudio.com/" target="_blank">VS Code</a>
-      +
-      <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
-      +
-      <a href="https://github.com/tauri-apps/tauri-vscode" target="_blank"
-        >Tauri</a
-      >
-      +
-      <a href="https://github.com/rust-lang/rust-analyzer" target="_blank"
-        >rust-analyzer</a
-      >
-    </p>
-
-    <Greet />
-  </div>
+    <template #fallback >
+      <div>
+        Loading ...
+      </div>
+    </template>
+  </Suspense>
 </template>
 
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
-}
-</style>

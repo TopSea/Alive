@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+src-tauri/live2d/aisaikesi_4/*
+src-tauri/live2d/abeikelongbi_3/*
+src-tauri/mmd/我也不知道叫啥/*
+src-tauri/mmd/【芙宁娜】_by_原神/*
+src-tauri/mmd/background/*

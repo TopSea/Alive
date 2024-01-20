@@ -2,9 +2,9 @@
 name = "alive"
 version = "0.0.0"
 description = "A Tauri App"
-authors = ["you"]
+authors = ["TopSea"]
 license = ""
-repository = ""
+repository = "https://github.com/TopSea/Alive"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -13,9 +13,11 @@ edition = "2021"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.5", features = ["shell-open"] }
+tauri = { version = "1.5", features = [ "api-all", "system-tray"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+tauri-plugin-store = { git = "https://mirror.ghproxy.com/https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+tauri-plugin-autostart = { git = "https://mirror.ghproxy.com/https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

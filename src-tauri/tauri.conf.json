@@ -11,35 +11,59 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
+      "all": true,
       "shell": {
         "all": false,
         "open": true
+      },
+      "window": {
+        "setSkipTaskbar": true,
+        "startDragging": true,
+        "all": true
+      },
+      "protocol": {
+        "all": true,
+        "asset": true,
+        "assetScope": ["**"]
+      },
+      "fs": {
+        "all": true,
+        "scope": ["$RESOURCE/*"]
       }
     },
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.tauri.dev",
+      "identifier": "top.topsea.alive",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
+      ],
+      "resources": [
+        "live2d/*",
+        "data/*"
       ]
     },
     "security": {
-      "csp": null
+      "csp": "default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content: https://asset.localhost; img-src *; asset: https://asset.localhost; connect-src * blob:;"
     },
     "windows": [
       {
+        "label": "main",
+        "decorations": false,
         "fullscreen": false,
         "resizable": true,
-        "title": "alive",
         "width": 800,
-        "height": 600
+        "height": 600,
+        "transparent": true
       }
-    ]
+    ],
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    }
   }
 }

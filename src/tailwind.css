@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .icon-menu {
+        @apply w-8 h-8 text-zinc-700 hover:text-zinc-500
+    }
+    .scroll-bg {
+        @apply  invisible flex h-8 rotate-90 items-center bg-gradient-to-l from-zinc-400 rounded-xl absolute -right-8 
+    }
+}
