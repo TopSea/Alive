@@ -16,6 +16,7 @@
     "@babylonjs/materials": "^6.38.0",
     "@heroicons/vue": "^2.1.1",
     "@tauri-apps/api": "^1.5.2",
+    "@types/node": "^20.11.5",
     "babylon-mmd": "^0.36.3",
     "babylonjs": "^6.38.1",
     "pixi-live2d-display": "^0.4.0",

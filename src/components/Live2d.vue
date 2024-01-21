@@ -12,22 +12,19 @@ import NumChange from "./NumChange.vue";
 import { Store } from "tauri-plugin-store-api";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
-import { WebviewWindow } from "@tauri-apps/api/window";
 
 onBeforeMount(() => {
   (window as any).PIXI = PIXI;
 })
 
 const resourceDirPath = await resourceDir();
-const path = await join(resourceDirPath, 'data', 'data_settings.json');
+const path = await join(resourceDirPath, 'data', 'sets_live2d.json');
 const store = new Store(path);
 const modelURL = await store.get("model_url") as string;
 const sModelVoice = ref(await store.get("model_voice") as boolean)
 const sModelScale = ref(await store.get("model_scale") as number)
 const sModelX = ref(await store.get("model_x") as number)
 const sModelY = ref(await store.get("model_y") as number)
-
-var settingsOpened = false
 
 console.log("modelURL:", modelURL);
 
@@ -85,39 +82,6 @@ async function listenEvents() {
   await listen('event_model_url', (_event: any) => {
     reloadPage()
   });
-
-  await listen('event_open_settings', (_event: any) => {
-    openSettings()
-  });
-}
-
-function openSettings() {
-  if (settingsOpened) {
-    const settingsWindow = WebviewWindow.getByLabel('tauri_win_settings');
-    settingsWindow?.show();
-    settingsWindow?.unminimize();
-    settingsWindow?.setFocus();
-  } else {
-    const settingsWindow = new WebviewWindow('tauri_win_settings', {
-      url: 'settings.html',
-      x: 64,
-      y: 64,
-      width: 640,
-      height: 440,
-      resizable: false,
-      title: "Settings",
-      fullscreen: false,
-    });
-
-    settingsWindow.once('tauri://created', function () {
-      console.log('tauri://created');
-      settingsOpened = true;
-    });
-    settingsWindow.once('tauri://destroyed', function () {
-      console.log('tauri://destroyed');
-      settingsOpened = false;
-    });
-  }
 }
 
 function reloadPage() {

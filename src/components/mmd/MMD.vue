@@ -7,9 +7,17 @@ import { SceneBuilder } from "./MMDSceneBuilder";
 import { onMounted, ref } from "vue";
 import { ArrowPathIcon, CameraIcon, PlayIcon, PauseIcon } from '@heroicons/vue/24/solid'
 import { emit as tauriEmit } from '@tauri-apps/api/event';
+import { join, resourceDir } from "@tauri-apps/api/path";
+import { Store } from "tauri-plugin-store-api";
+
+const resourceDirPath = await resourceDir();
+const path = await join(resourceDirPath, 'data', 'sets_mmd.json');
+const store = new Store(path);
+const mmdAliveUrl = await store.get("mmd_alive_url") as string;
+const mmdModel = await store.get("mmd_model") as string;
+const pausedAnimation = ref(await store.get("is_pausing") as boolean)
 
 const mmd_canvas = ref();
-const pausedAnimation = ref(false)
 
 function reloadPage() {
   location.reload()
@@ -40,7 +48,9 @@ onMounted(() => {
   BaseRuntime.Create({
     canvas: mmdCanvas,
     engine,
-    sceneBuilder: new SceneBuilder()
+    sceneBuilder: new SceneBuilder(),
+    mmdAliveUrl,
+    mmdModel
   }).then(runtime => runtime.run());
 
 })

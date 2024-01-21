@@ -21,7 +21,7 @@ fn main() {
             // 读取并设置窗口大小和位置的信息
             let stores = app.state::<StoreCollection<Wry>>();
             let mut data = app.path_resolver().resource_dir().unwrap();
-            data.push("data/data_settings.json");
+            data.push("data/sets_alive.json");
 
             // 窗口大小和位置信息
             let mut win_w: u32 = 0;
@@ -138,7 +138,7 @@ fn main() {
 
                 let stores = app.state::<StoreCollection<Wry>>();
                 let mut data = app.path_resolver().resource_dir().unwrap();
-                data.push("data/data_settings.json");
+                data.push("data/sets_alive.json");
 
                 match id.as_str() {
                     "m_hide" => {

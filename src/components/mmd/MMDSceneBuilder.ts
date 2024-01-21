@@ -32,7 +32,7 @@ import { DefaultRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPi
 import { Scene } from "@babylonjs/core/scene";
 import havokPhysics from "@babylonjs/havok";
 import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
-import type { MmdAnimation } from "babylon-mmd/esm/Loader/Animation/mmdAnimation";
+import { MmdAnimation } from "babylon-mmd/esm/Loader/Animation/mmdAnimation";
 import type { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import type { PmxLoader } from "babylon-mmd/esm/Loader/pmxLoader";
 import { VmdLoader } from "babylon-mmd/esm/Loader/vmdLoader";
@@ -46,15 +46,26 @@ import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl"
 
 import type { ISceneBuilder } from "./MMDRuntime";
 
-
+import { Store } from "tauri-plugin-store-api";
+import { join, resourceDir } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
+import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
+
+type InAnimationLoop = () => number;
 
 export class SceneBuilder implements ISceneBuilder {
     private _mmdCamera: boolean = false;
-
-
-    public async build(canvas: HTMLCanvasElement, engine: Engine): Promise<Scene> {
+    
+    public async build(canvas: HTMLCanvasElement, engine: Engine, mmdAliveUrl: string, mmdAlive: string): Promise<Scene> {
         console.log("SceneBuilder build");
+
+        // 加载 alive_mmd 设置
+        const sets = await fetch(mmdAliveUrl).then((response) => response.json());
+        console.log("sets: ", sets);
+        const lastSlash = mmdAliveUrl.lastIndexOf('/');
+        const baseUrl = mmdAliveUrl.substring(0, lastSlash + 1);
+        console.log("baseUrl: ", baseUrl);
+        const aliveMotions: any[] = sets.alive_motions;
 
         // 加载中显示
         const loadingTexts: string[] = [];
@@ -133,13 +144,12 @@ export class SceneBuilder implements ISceneBuilder {
 
 
         // 加载 mmd 背景
-        const backgroundBaseUrl = "https://asset.localhost/mmd/【芙宁娜】_by_原神/background/";
-        const backgrounds = ["主体-黑蓝白.pmx", "地面装饰-黑蓝白.pmx", "吊饰-黑蓝白.pmx"];
+        const backgrounds:string[] = sets.default_bg;
         backgrounds.forEach(async (background) => {
             const mmdBackground = await SceneLoader.ImportMeshAsync(
                 "",
-                backgroundBaseUrl,
-                background,
+                baseUrl + background,
+                "",
                 scene,
                 (event) => updateLoadingText(1, `Loading background... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
             )
@@ -158,10 +168,10 @@ export class SceneBuilder implements ISceneBuilder {
         mmdRuntime.register(scene);
 
         // 音频
-        const audioPlayer = new StreamAudioPlayer(scene);
-        audioPlayer.preservesPitch = false;
-        audioPlayer.source = "https://asset.localhost/mmd/我也不知道叫啥/bgm.mp3";
-        mmdRuntime.setAudioPlayer(audioPlayer);
+        // const audioPlayer = new StreamAudioPlayer(scene);
+        // audioPlayer.preservesPitch = false;
+        // audioPlayer.source = "https://asset.localhost/mmd/我也不知道叫啥/bgm.mp3";
+        // mmdRuntime.setAudioPlayer(audioPlayer);
         // 播放控制器
         // new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
 
@@ -173,22 +183,37 @@ export class SceneBuilder implements ISceneBuilder {
         // 加载 vmd 动作
         const vmdLoader = new VmdLoader(scene);
         vmdLoader.loggingEnabled = true;
-        promises.push(vmdLoader.loadAsync("motion", [
-            "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion.vmd",
-            "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion_face.vmd",
-            "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion_unknown.vmd"
-        ],
-            (event) => updateLoadingText(0, `Loading motion... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`))
-        );
+
+        aliveMotions.forEach((aliveMotion) => {
+            promises.push(vmdLoader.loadAsync(aliveMotion.motion_name, this.getMotionUrl(baseUrl, aliveMotion.motions),
+                (event) => updateLoadingText(0, `Loading motion... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`))
+            );
+        })
+
+        // promises.push(vmdLoader.loadAsync("motion", [
+        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion.vmd",
+        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion_face.vmd",
+        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion_unknown.vmd"
+        // ],
+        //     (event) => updateLoadingText(0, `Loading motion... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`))
+        // );
 
         // 加载 mmd 模型
+        const aliveMmdModel:string = sets.mmd_model;
         promises.push(SceneLoader.ImportMeshAsync(
-            undefined,
-            "https://asset.localhost/mmd/【芙宁娜】_by_原神/",
-            "【芙宁娜】.pmx",
+            aliveMmdModel.replace(".pmx", ""),
+            baseUrl + aliveMmdModel,
+            "",
             scene,
             (event) => updateLoadingText(1, `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
         ));
+        // promises.push(SceneLoader.ImportMeshAsync(
+        //     undefined,
+        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/",
+        //     "【芙宁娜】.pmx",
+        //     scene,
+        //     (event) => updateLoadingText(1, `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
+        // ));
 
         // 物理效果
         // promises.push((async(): Promise<void> => {
@@ -201,16 +226,30 @@ export class SceneBuilder implements ISceneBuilder {
 
 
         // 等待所有加载完成. parallel loading is faster than sequential loading.
-        const [mmdAnimation, { meshes: [modelMesh] }] = await Promise.all(promises);
-        if (!((_mmdAnimation: any): _mmdAnimation is MmdAnimation => true)(mmdAnimation)) throw new Error("unreachable");
+        const [mmdAnimations, { meshes: [modelMesh] }] = await Promise.all(promises).then((values) => {
+            const motions: MmdAnimation[] = [];
+            var mmdMeshs: any;
+            values.forEach((value) => {
+                if (value instanceof MmdAnimation) {
+                    motions.push(value)
+                } else {
+                    mmdMeshs = value
+                }
+            })
+            return [motions, mmdMeshs]
+        });
+        // if (!((_mmdAnimation: any): _mmdAnimation is MmdAnimation => true)(mmdAnimation)) throw new Error("unreachable");
         if (!((_mesh: any): _mesh is MmdMesh => true)(modelMesh)) throw new Error("unreachable");
 
         // 隐藏加载显示
         scene.onAfterRenderObservable.addOnce(() => engine.hideLoadingUI());
 
         mmdRuntime.setCamera(mmdCamera);
-        mmdCamera.addAnimation(mmdAnimation);
-        mmdCamera.setAnimation("motion");
+        mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
+            mmdCamera.addAnimation(mmdAnimation);
+        })
+        const currMotion = this.randomAnimation(sets.default_motions);
+        mmdCamera.setAnimation(currMotion);
 
 
         {
@@ -220,8 +259,37 @@ export class SceneBuilder implements ISceneBuilder {
             modelMesh.receiveShadows = true;
 
             const mmdModel = mmdRuntime.createMmdModel(modelMesh);
-            mmdModel.addAnimation(mmdAnimation);
-            mmdModel.setAnimation("motion");
+            mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
+                mmdModel.addAnimation(mmdAnimation);
+            })
+            mmdModel.setAnimation(currMotion);
+
+            const animteLoop:InAnimationLoop = () => {
+                const nextMotion = this.randomAnimation(sets.default_motions);
+                mmdRuntime.seekAnimation(0);
+                mmdCamera.setAnimation(nextMotion);
+                mmdModel.setAnimation(nextMotion);
+                console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
+                console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
+                console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
+                
+                mmdRuntime.playAnimation();
+                return mmdRuntime.animationDuration * 1000 + 500;
+            }
+            this.animationLoop(animteLoop, mmdRuntime.animationDuration * 1000 + 500);
+            // setTimeout(() => {
+            //     // 一个动作完成。
+            //     const nextMotion = this.randomAnimation(sets.default_motions);
+            //     mmdRuntime.seekAnimation(0);
+            //     mmdCamera.setAnimation(nextMotion);
+            //     mmdModel.setAnimation(nextMotion);
+            //     console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
+            //     console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
+            //     console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
+                
+            //     mmdRuntime.playAnimation();
+                
+            // }, mmdRuntime.animationDuration * 1000 + 500);
 
             // make sure directional light follow the model
             const bodyBone = mmdModel.runtimeBones.find((bone) => bone.name === "センター");
@@ -287,6 +355,7 @@ export class SceneBuilder implements ISceneBuilder {
             const isPaused = event.payload as boolean
             console.log("event_pause_animation ", isPaused);
             if (isPaused) {
+                // mmdRuntime.dispose(scene);
                 mmdRuntime.pauseAnimation();
             } else {
                 mmdRuntime.playAnimation();
@@ -294,5 +363,30 @@ export class SceneBuilder implements ISceneBuilder {
         });
 
         return scene;
+    }
+
+    private getMotionUrl(baseUrl: string, motions: string[]): string[] {
+        const motionUrls:string[] = [];
+
+        motions.forEach(
+            (motion) => {
+                motionUrls.push(baseUrl + motion);
+            }
+        )
+        return motionUrls;
+    }
+    private randomAnimation(motions: string[]): string {
+        if (motions.length === 0) {
+            return "";
+        }
+        var rand = Math.floor(Math.random() * motions.length);
+        return motions[rand];
+    }
+    private animationLoop(loop: InAnimationLoop, currDuration: number) {
+        setTimeout(() => {
+            // 一个动作完成。
+            const nextDuration = loop();
+            this.animationLoop(loop, nextDuration);
+        }, currDuration);
     }
 }

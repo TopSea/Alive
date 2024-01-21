@@ -1,0 +1,10 @@
+{
+    "click_through": false,
+    "stay_top": true,
+    "auto_start": true,
+    "is_mmd": true,
+    "win_h": 650,
+    "win_w": 800,
+    "pos_y": 64,
+    "pos_x": 64
+}

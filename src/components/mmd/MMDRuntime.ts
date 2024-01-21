@@ -2,24 +2,30 @@ import type { Engine } from "@babylonjs/core/Engines/engine";
 import type { Scene } from "@babylonjs/core/scene";
 
 export interface ISceneBuilder {
-    build(canvas: HTMLCanvasElement, engine: Engine): Scene | Promise<Scene>;
+    build(canvas: HTMLCanvasElement, engine: Engine, mmdAliveUrl: string, mmdModel: string): Scene | Promise<Scene>;
 }
 
 export interface BaseRuntimeInitParams {
     canvas: HTMLCanvasElement;
     engine: Engine;
     sceneBuilder: ISceneBuilder;
+    mmdAliveUrl: string; 
+    mmdModel: string;
 }
 
 export class BaseRuntime {
     private readonly _canvas: HTMLCanvasElement;
     private readonly _engine: Engine;
+    private readonly _mmdAliveUrl: string; 
+    private readonly _mmdModel: string;
     private _scene: Scene;
     private _onTick: () => void;
 
     private constructor(params: BaseRuntimeInitParams) {
         this._canvas = params.canvas;
         this._engine = params.engine;
+        this._mmdAliveUrl = params.mmdAliveUrl;
+        this._mmdModel = params.mmdModel;
         console.log("this._canvas.height ", this._canvas.height);
 
         this._scene = null!;
@@ -50,7 +56,7 @@ export class BaseRuntime {
     };
 
     private async _initialize(sceneBuilder: ISceneBuilder): Promise<Scene> {
-        return await sceneBuilder.build(this._canvas, this._engine);
+        return await sceneBuilder.build(this._canvas, this._engine, this._mmdAliveUrl, this._mmdModel);
     }
 
     private _makeOnTick(): () => void {
