@@ -58,8 +58,8 @@ export class SceneBuilder implements ISceneBuilder {
     private _mmdDancing: boolean = false;
     private _currDuration: number = 0;
     private _loopId: any;
-    
-    public async build(canvas: HTMLCanvasElement, engine: Engine, mmdAliveUrl: string, mmdAlive: string): Promise<Scene> {
+
+    public async build(canvas: HTMLCanvasElement, engine: Engine, mmdAliveUrl: string): Promise<Scene> {
         console.log("SceneBuilder build");
 
         // 加载 alive_mmd 设置
@@ -67,6 +67,7 @@ export class SceneBuilder implements ISceneBuilder {
         console.log("sets: ", sets);
         const lastSlash = mmdAliveUrl.lastIndexOf('/');
         const baseUrl = mmdAliveUrl.substring(0, lastSlash + 1);
+        const interval: number = sets.interval;
         console.log("baseUrl: ", baseUrl);
         const aliveMotions: any[] = sets.alive_motions;
 
@@ -147,7 +148,7 @@ export class SceneBuilder implements ISceneBuilder {
 
 
         // 加载 mmd 背景
-        const backgrounds:string[] = sets.default_bg;
+        const backgrounds: string[] = sets.default_bg;
         backgrounds.forEach(async (background) => {
             const mmdBackground = await SceneLoader.ImportMeshAsync(
                 "",
@@ -193,16 +194,8 @@ export class SceneBuilder implements ISceneBuilder {
             );
         })
 
-        // promises.push(vmdLoader.loadAsync("motion", [
-        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion.vmd",
-        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion_face.vmd",
-        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/motion/motion_unknown.vmd"
-        // ],
-        //     (event) => updateLoadingText(0, `Loading motion... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`))
-        // );
-
         // 加载 mmd 模型
-        const aliveMmdModel:string = sets.mmd_model;
+        const aliveMmdModel: string = sets.mmd_model;
         promises.push(SceneLoader.ImportMeshAsync(
             aliveMmdModel.replace(".pmx", ""),
             baseUrl + aliveMmdModel,
@@ -210,13 +203,6 @@ export class SceneBuilder implements ISceneBuilder {
             scene,
             (event) => updateLoadingText(1, `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
         ));
-        // promises.push(SceneLoader.ImportMeshAsync(
-        //     undefined,
-        //     "https://asset.localhost/mmd/【芙宁娜】_by_原神/",
-        //     "【芙宁娜】.pmx",
-        //     scene,
-        //     (event) => updateLoadingText(1, `Loading model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
-        // ));
 
         // 物理效果
         // promises.push((async(): Promise<void> => {
@@ -255,57 +241,41 @@ export class SceneBuilder implements ISceneBuilder {
         mmdCamera.setAnimation(currMotion);
 
 
-        // {
-            modelMesh.parent = mmdRoot;
+        modelMesh.parent = mmdRoot;
 
-            for (const mesh of modelMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
-            modelMesh.receiveShadows = true;
+        for (const mesh of modelMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
+        modelMesh.receiveShadows = true;
 
-            const mmdModel = mmdRuntime.createMmdModel(modelMesh);
-            mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
-                mmdModel.addAnimation(mmdAnimation);
-            })
-            mmdModel.setAnimation(currMotion);
-            this._currDuration = mmdRuntime.animationDuration * 1000 + 500;
+        const mmdModel = mmdRuntime.createMmdModel(modelMesh);
+        mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
+            mmdModel.addAnimation(mmdAnimation);
+        })
+        mmdModel.setAnimation(currMotion);
+        this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
 
-            const animteLoop:InAnimationLoop = (mmdDancing) => {
-                const nextMotion = this.randomAnimation(mmdDancing? sets.dance_motions : sets.default_motions);
-                mmdRuntime.seekAnimation(0);
-                mmdCamera.setAnimation(nextMotion);
-                mmdModel.setAnimation(nextMotion);
-                this._currDuration = mmdRuntime.animationDuration * 1000 + 500;
-                console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
-                console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
-                console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
-                
-                mmdRuntime.playAnimation();
-                // return mmdRuntime.animationDuration * 1000 + 500;
-            }
-            this.animationLoop(animteLoop);
-            // setTimeout(() => {
-            //     // 一个动作完成。
-            //     const nextMotion = this.randomAnimation(sets.default_motions);
-            //     mmdRuntime.seekAnimation(0);
-            //     mmdCamera.setAnimation(nextMotion);
-            //     mmdModel.setAnimation(nextMotion);
-            //     console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
-            //     console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
-            //     console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
-                
-            //     mmdRuntime.playAnimation();
-                
-            // }, mmdRuntime.animationDuration * 1000 + 500);
+        const animteLoop: InAnimationLoop = (mmdDancing) => {
+            const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.default_motions);
+            mmdRuntime.seekAnimation(0);
+            mmdCamera.setAnimation(nextMotion);
+            mmdModel.setAnimation(nextMotion);
+            this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
+            console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
+            console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
+            console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
 
-            // make sure directional light follow the model
-            const bodyBone = mmdModel.runtimeBones.find((bone) => bone.name === "センター");
-            const boneWorldMatrix = new Matrix();
+            mmdRuntime.playAnimation();
+        }
+        this.animationLoop(animteLoop);
 
-            scene.onBeforeRenderObservable.add(() => {
-                bodyBone!.getWorldMatrixToRef(boneWorldMatrix).multiplyToRef(modelMesh.getWorldMatrix(), boneWorldMatrix);
-                boneWorldMatrix.getTranslationToRef(directionalLight.position);
-                directionalLight.position.y -= 10 * worldScale;
-            });
-        // }
+        // make sure directional light follow the model
+        const bodyBone = mmdModel.runtimeBones.find((bone) => bone.name === "センター");
+        const boneWorldMatrix = new Matrix();
+
+        scene.onBeforeRenderObservable.add(() => {
+            bodyBone!.getWorldMatrixToRef(boneWorldMatrix).multiplyToRef(modelMesh.getWorldMatrix(), boneWorldMatrix);
+            boneWorldMatrix.getTranslationToRef(directionalLight.position);
+            directionalLight.position.y -= 10 * worldScale;
+        });
 
 
         // optimize scene when all assets are loaded
@@ -376,16 +346,16 @@ export class SceneBuilder implements ISceneBuilder {
             // 清除掉定时器，不然定时器到时间后就会切换动画
             clearTimeout(this._loopId);
 
-            const nextMotion = this.randomAnimation(dancing? sets.dance_motions : sets.default_motions);
+            const nextMotion = this.randomAnimation(dancing ? sets.dance_motions : sets.default_motions);
             mmdCamera.setAnimation(nextMotion);
             mmdModel.setAnimation(nextMotion);
-            this._currDuration = mmdRuntime.animationDuration * 1000 + 500;
+            this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
             console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
             console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
             console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
-            
+
             mmdRuntime.playAnimation();
-            
+
             // 重新设置定时器，因为需要动画循环
             this.animationLoop(animteLoop);
         });
@@ -394,7 +364,7 @@ export class SceneBuilder implements ISceneBuilder {
     }
 
     private getMotionUrl(baseUrl: string, motions: string[]): string[] {
-        const motionUrls:string[] = [];
+        const motionUrls: string[] = [];
 
         motions.forEach(
             (motion) => {

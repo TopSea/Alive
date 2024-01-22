@@ -15,7 +15,6 @@ const resourceDirPath = await resourceDir();
 const path = await join(resourceDirPath, 'data', 'sets_mmd.json');
 const store = new Store(path);
 const mmdAliveUrl = await store.get("mmd_alive_url") as string;
-const mmdModel = await store.get("mmd_model") as string;
 const pausedAnimation = ref(await store.get("is_pausing") as boolean)
 
 const dancing = ref(false)
@@ -56,8 +55,7 @@ onMounted(() => {
     canvas: mmdCanvas,
     engine,
     sceneBuilder: new SceneBuilder(),
-    mmdAliveUrl,
-    mmdModel
+    mmdAliveUrl
   }).then(runtime => runtime.run());
 
 })
