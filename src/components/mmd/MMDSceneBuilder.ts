@@ -172,15 +172,9 @@ export class SceneBuilder implements ISceneBuilder {
         mmdRuntime.register(scene);
 
         // 音频
-        // const audioPlayer = new StreamAudioPlayer(scene);
-        // audioPlayer.preservesPitch = false;
-        // audioPlayer.source = "https://asset.localhost/mmd/我也不知道叫啥/bgm.mp3";
-        // mmdRuntime.setAudioPlayer(audioPlayer);
-        // 播放控制器
-        // new MmdPlayerControl(scene, mmdRuntime, audioPlayer);
-
-        // 先开启播放，好有些反馈。未见其人，先闻其声。
-        mmdRuntime.playAnimation();
+        const audioPlayer = new StreamAudioPlayer(scene);
+        audioPlayer.preservesPitch = false;
+        mmdRuntime.setAudioPlayer(audioPlayer);
 
         const promises: Promise<any>[] = [];
 
@@ -238,8 +232,13 @@ export class SceneBuilder implements ISceneBuilder {
             mmdCamera.addAnimation(mmdAnimation);
         })
         const currMotion = this.randomAnimation(sets.default_motions);
+        const alive = aliveMotions.find((aliveMotion) => currMotion === aliveMotion.motion_name)
+        if (alive.bgm !== "") {
+            audioPlayer.source = baseUrl + alive.bgm;
+        }
         mmdCamera.setAnimation(currMotion);
-
+        // 先开启播放，好有些反馈。未见其人，先闻其声。
+        mmdRuntime.playAnimation();
 
         modelMesh.parent = mmdRoot;
 
@@ -338,7 +337,7 @@ export class SceneBuilder implements ISceneBuilder {
         });
         await listen('event_mmd_dancing', (event: any) => {
             const dancing = event.payload as boolean;
-
+            
             mmdRuntime.pauseAnimation();
             mmdRuntime.seekAnimation(0);
             this._mmdDancing = dancing;
@@ -347,12 +346,17 @@ export class SceneBuilder implements ISceneBuilder {
             clearTimeout(this._loopId);
 
             const nextMotion = this.randomAnimation(dancing ? sets.dance_motions : sets.default_motions);
+            const alive = aliveMotions.find((aliveMotion) => nextMotion === aliveMotion.motion_name)
+            if (alive.bgm !== "") {
+                audioPlayer.source = baseUrl + alive.bgm;
+            }
+
             mmdCamera.setAnimation(nextMotion);
             mmdModel.setAnimation(nextMotion);
             this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
             console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
             console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
-            console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
+            console.log("animationDuration:", mmdRuntime.animationDuration);
 
             mmdRuntime.playAnimation();
 
