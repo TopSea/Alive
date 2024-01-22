@@ -1,5 +1,8 @@
 {
     "model_url": "https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json",
+    "http_models": [
+        
+    ],
     "model_x": 140,
     "model_y": 0,
     "model_voice": true,

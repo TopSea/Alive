@@ -4,7 +4,7 @@ import { join, resourceDir } from "@tauri-apps/api/path";
 import { enable, disable } from "tauri-plugin-autostart-api";
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
-import { onBeforeMount, onMounted, onUnmounted, ref } from "vue";
+import { onBeforeMount, ref } from "vue";
 import {
   SpeakerWaveIcon, CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon,
   ArrowPathIcon, PlusIcon
@@ -12,22 +12,24 @@ import {
 import AddModelDialog from "./AddModelDialog.vue";
 
 const resourceDirPath = await resourceDir();
-const path = await join(resourceDirPath, 'data', 'data_settings.json');
-console.log("path: ", path);
+const pathAlive = await join(resourceDirPath, 'data', 'sets_alive.json');
+const pathLive2d = await join(resourceDirPath, 'data', 'sets_mmd.json');
 
-const store = new Store(path);
+const storeAlive = new Store(pathAlive);
+const storeLive2d = new Store(pathLive2d);
 const addingModel = ref(false);
 
 const allModelNames = ref([""]);
 const allModelPaths = ref([""]);
 
 // 获取设置信息
-const sModelVoice = ref(await store.get("model_voice") as boolean)
-const sClickThroughe = ref(await store.get("click_through") as boolean)
-const sStayTop = ref(await store.get("stay_top") as boolean)
-const sAutoStart = ref(await store.get("auto_start") as boolean)
-const sHttpModels = ref(await store.get("http_models") as string[])
-const modelUrl = ref(await store.get("model_url") as string)
+const sModelVoice = ref(await storeLive2d.get("model_voice") as boolean)
+const sClickThroughe = ref(await storeAlive.get("click_through") as boolean)
+const sStayTop = ref(await storeAlive.get("stay_top") as boolean)
+const sAutoStart = ref(await storeAlive.get("auto_start") as boolean)
+const sHttpModels = ref(await storeLive2d.get("http_models") as string[])
+const modelUrl = ref(await storeLive2d.get("model_url") as string)
+console.log("modelUrl ", modelUrl)
 const currModelName = ref("")
 
 onBeforeMount(() => {
@@ -84,9 +86,6 @@ async function findLive2dModels(models: FileEntry[]) {
 
 async function setSettings(key: string, val: any) {
   console.log("setSettings-", key, ": ", val);
-  if (key !== "model_url") {
-    await store.set(key, val);
-  }
   const mainWindow = WebviewWindow.getByLabel('main')
 
   switch (key) {
@@ -98,6 +97,8 @@ async function setSettings(key: string, val: any) {
       } else {
         mainWindow?.emit('model_voice', false);
       }
+      await storeLive2d.set(key, val);
+      await storeLive2d.save();
       break;
     }
     case "click_through": {
@@ -107,6 +108,8 @@ async function setSettings(key: string, val: any) {
       } else {
         mainWindow?.setIgnoreCursorEvents(false);
       }
+      await storeAlive.set(key, val);
+      await storeAlive.save();
       break;
     }
     case "stay_top": {
@@ -116,6 +119,8 @@ async function setSettings(key: string, val: any) {
       } else {
         mainWindow?.setAlwaysOnTop(false);
       }
+      await storeAlive.set(key, val);
+      await storeAlive.save();
       break;
     }
     case "auto_start": {
@@ -125,6 +130,8 @@ async function setSettings(key: string, val: any) {
       } else {
         disable();
       }
+      await storeAlive.set(key, val);
+      await storeAlive.save();
       break;
     }
     case "model_url": {
@@ -138,15 +145,14 @@ async function setSettings(key: string, val: any) {
         const http = foundURL.replace(resourceDirPath, "https://asset.localhost/");
         const url = http.replace(/\\/g, "/");
         console.log("foundURL: ", url);
-        await store.set(key, url);
+        await storeLive2d.set(key, url);
         mainWindow?.emit('event_model_url', url);
       }
+      await storeLive2d.save();
       break;
     }
     default: { }
   }
-
-  await store.save();
 }
 
 async function addModel(modelURL: string) {
@@ -161,8 +167,8 @@ async function addModel(modelURL: string) {
     const modelName = modelURL.substring(lastSlash + 1)
     allModelNames.value.push(modelName)
 
-    await store.set("http_models", sHttpModels.value)
-    await store.save()
+    await storeLive2d.set("http_models", sHttpModels.value)
+    await storeLive2d.save()
     addingModel.value = false
   }
 }

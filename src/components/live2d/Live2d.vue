@@ -11,7 +11,7 @@ import {
 import NumChange from "./NumChange.vue";
 import { Store } from "tauri-plugin-store-api";
 import { join, resourceDir } from "@tauri-apps/api/path";
-import { listen } from "@tauri-apps/api/event";
+import { listen, emit as tauriEmit } from "@tauri-apps/api/event";
 
 onBeforeMount(() => {
   (window as any).PIXI = PIXI;
@@ -86,6 +86,10 @@ async function listenEvents() {
 
 function reloadPage() {
   location.reload()
+}
+
+async function openSettings() {
+  await tauriEmit('event_open_settings', true);
 }
 
 onMounted(() => {

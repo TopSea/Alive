@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onBeforeMount, onMounted, ref } from "vue";
-import Live2d from "./components/Live2d.vue";
+import Live2d from "./components/live2d/Live2d.vue";
 import MMD from "./components/mmd/MMD.vue"
 import { listen } from "@tauri-apps/api/event";
 import { join, resourceDir } from "@tauri-apps/api/path";
