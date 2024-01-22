@@ -5,7 +5,8 @@ import { BaseRuntime } from "./MMDRuntime";
 import { SceneBuilder } from "./MMDSceneBuilder";
 // import { SceneBuilder } from "./MMDBuilder";
 import { onMounted, ref } from "vue";
-import { ArrowPathIcon, CameraIcon, PlayIcon, PauseIcon } from '@heroicons/vue/24/solid'
+import { ArrowPathIcon, CameraIcon, PlayIcon, PauseIcon, FilmIcon as DancingIcon } from '@heroicons/vue/24/solid'
+import { FilmIcon } from '@heroicons/vue/24/outline'
 import { emit as tauriEmit } from '@tauri-apps/api/event';
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
@@ -16,6 +17,8 @@ const store = new Store(path);
 const mmdAliveUrl = await store.get("mmd_alive_url") as string;
 const mmdModel = await store.get("mmd_model") as string;
 const pausedAnimation = ref(await store.get("is_pausing") as boolean)
+
+const dancing = ref(false)
 
 const mmd_canvas = ref();
 
@@ -29,6 +32,10 @@ async function changeCamera() {
 async function pauseAnimation() {
   pausedAnimation.value = !pausedAnimation.value
   await tauriEmit('event_pause_animation', pausedAnimation.value);
+}
+async function mmdDancing() {
+  dancing.value = !dancing.value
+  await tauriEmit('event_mmd_dancing', dancing.value);
 }
 
 onMounted(() => {
@@ -71,6 +78,10 @@ onMounted(() => {
       <li class="w-8 h-8" @click="pauseAnimation">
         <PauseIcon v-if="!pausedAnimation" class="icon-menu" />
         <PlayIcon v-else class="icon-menu" />
+      </li>
+      <li class="w-8 h-8" @click="mmdDancing">
+        <FilmIcon v-if="dancing"/>
+        <DancingIcon v-else/>
       </li>
     </ul>
   </div>

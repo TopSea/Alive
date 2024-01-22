@@ -51,10 +51,13 @@ import { join, resourceDir } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 
-type InAnimationLoop = () => number;
+type InAnimationLoop = (mmdDancing: boolean) => void;
 
 export class SceneBuilder implements ISceneBuilder {
     private _mmdCamera: boolean = false;
+    private _mmdDancing: boolean = false;
+    private _currDuration: number = 0;
+    private _loopId: any;
     
     public async build(canvas: HTMLCanvasElement, engine: Engine, mmdAliveUrl: string, mmdAlive: string): Promise<Scene> {
         console.log("SceneBuilder build");
@@ -252,7 +255,7 @@ export class SceneBuilder implements ISceneBuilder {
         mmdCamera.setAnimation(currMotion);
 
 
-        {
+        // {
             modelMesh.parent = mmdRoot;
 
             for (const mesh of modelMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
@@ -263,20 +266,22 @@ export class SceneBuilder implements ISceneBuilder {
                 mmdModel.addAnimation(mmdAnimation);
             })
             mmdModel.setAnimation(currMotion);
+            this._currDuration = mmdRuntime.animationDuration * 1000 + 500;
 
-            const animteLoop:InAnimationLoop = () => {
-                const nextMotion = this.randomAnimation(sets.default_motions);
+            const animteLoop:InAnimationLoop = (mmdDancing) => {
+                const nextMotion = this.randomAnimation(mmdDancing? sets.dance_motions : sets.default_motions);
                 mmdRuntime.seekAnimation(0);
                 mmdCamera.setAnimation(nextMotion);
                 mmdModel.setAnimation(nextMotion);
+                this._currDuration = mmdRuntime.animationDuration * 1000 + 500;
                 console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
                 console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
                 console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
                 
                 mmdRuntime.playAnimation();
-                return mmdRuntime.animationDuration * 1000 + 500;
+                // return mmdRuntime.animationDuration * 1000 + 500;
             }
-            this.animationLoop(animteLoop, mmdRuntime.animationDuration * 1000 + 500);
+            this.animationLoop(animteLoop);
             // setTimeout(() => {
             //     // 一个动作完成。
             //     const nextMotion = this.randomAnimation(sets.default_motions);
@@ -300,7 +305,7 @@ export class SceneBuilder implements ISceneBuilder {
                 boneWorldMatrix.getTranslationToRef(directionalLight.position);
                 directionalLight.position.y -= 10 * worldScale;
             });
-        }
+        // }
 
 
         // optimize scene when all assets are loaded
@@ -361,6 +366,29 @@ export class SceneBuilder implements ISceneBuilder {
                 mmdRuntime.playAnimation();
             }
         });
+        await listen('event_mmd_dancing', (event: any) => {
+            const dancing = event.payload as boolean;
+
+            mmdRuntime.pauseAnimation();
+            mmdRuntime.seekAnimation(0);
+            this._mmdDancing = dancing;
+
+            // 清除掉定时器，不然定时器到时间后就会切换动画
+            clearTimeout(this._loopId);
+
+            const nextMotion = this.randomAnimation(dancing? sets.dance_motions : sets.default_motions);
+            mmdCamera.setAnimation(nextMotion);
+            mmdModel.setAnimation(nextMotion);
+            this._currDuration = mmdRuntime.animationDuration * 1000 + 500;
+            console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
+            console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
+            console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
+            
+            mmdRuntime.playAnimation();
+            
+            // 重新设置定时器，因为需要动画循环
+            this.animationLoop(animteLoop);
+        });
 
         return scene;
     }
@@ -382,11 +410,11 @@ export class SceneBuilder implements ISceneBuilder {
         var rand = Math.floor(Math.random() * motions.length);
         return motions[rand];
     }
-    private animationLoop(loop: InAnimationLoop, currDuration: number) {
-        setTimeout(() => {
+    private animationLoop(loop: InAnimationLoop) {
+        this._loopId = setTimeout(() => {
             // 一个动作完成。
-            const nextDuration = loop();
-            this.animationLoop(loop, nextDuration);
-        }, currDuration);
+            loop(this._mmdDancing);
+            this.animationLoop(loop);
+        }, this._currDuration);
     }
 }
