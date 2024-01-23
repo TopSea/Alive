@@ -1,6 +1,8 @@
 {
     "mmd_alive_url": "https://asset.localhost/mmd/【芙宁娜】_by_原神/【芙宁娜】.alive_mmd.json",
+    "http_models": [],
+    "is_muted": true,
     "is_mmd_camera": true,
-    "is_pausing": false,
+    "is_paused": false,
     "use_background": true
 }

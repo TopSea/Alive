@@ -23,12 +23,11 @@ const allModelNames = ref([""]);
 const allModelPaths = ref([""]);
 
 // 获取设置信息
-const sModelVoice = ref(await storeLive2d.get("model_voice") as boolean)
 const sClickThroughe = ref(await storeAlive.get("click_through") as boolean)
 const sStayTop = ref(await storeAlive.get("stay_top") as boolean)
 const sAutoStart = ref(await storeAlive.get("auto_start") as boolean)
 const sHttpModels = ref(await storeLive2d.get("http_models") as string[])
-const modelUrl = ref(await storeLive2d.get("model_url") as string)
+const modelUrl = ref(await storeLive2d.get("mmd_alive_url") as string)
 console.log("modelUrl ", modelUrl)
 const currModelName = ref("")
 
@@ -72,7 +71,7 @@ async function findLive2dModels(models: FileEntry[]) {
     if (model.children) {
       findLive2dModels(model.children)
     } else {
-      if (model.name?.endsWith(".model3.json") || model.name?.endsWith(".model.json")) {
+      if (model.name?.endsWith(".alive_mmd.json")) {
         if (allModelNames.value.indexOf(model.name) === -1) {
           allModelNames.value.push(model.name);
           allModelPaths.value.push(model.path);
@@ -89,18 +88,6 @@ async function setSettings(key: string, val: any) {
   const mainWindow = WebviewWindow.getByLabel('main')
 
   switch (key) {
-    case "model_voice": {
-      sModelVoice.value = val as boolean
-
-      if (val) {
-        mainWindow?.emit('model_voice', true);
-      } else {
-        mainWindow?.emit('model_voice', false);
-      }
-      await storeLive2d.set(key, val);
-      await storeLive2d.save();
-      break;
-    }
     case "click_through": {
       sClickThroughe.value = val as boolean
       if (val) {
@@ -181,7 +168,7 @@ async function addModel(modelURL: string) {
       <button class="flex h-full items-center mx-4 px-4 space-x-3">
         <SpeakerWaveIcon class=" w-6 h-6" />
         <span class="w-28 text-left">Model Voice</span>
-        <input type="checkbox" class="w-4 h-4" :checked="sModelVoice"
+        <input type="checkbox" class="w-4 h-4" 
           @change="() => { setSettings('click_through', !sClickThroughe) }" />
       </button>
       <button class="flex h-full items-center mx-4 px-4 space-x-3">

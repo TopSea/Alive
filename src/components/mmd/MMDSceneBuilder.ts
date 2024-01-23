@@ -23,15 +23,11 @@ import { DirectionalLight } from "@babylonjs/core/Lights/directionalLight";
 import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
 import { ShadowGenerator } from "@babylonjs/core/Lights/Shadows/shadowGenerator";
 import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
-import { Color3, Color4 } from "@babylonjs/core/Maths/math.color";
+import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
-import { CreateGround } from "@babylonjs/core/Meshes/Builders/groundBuilder";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
 import { DefaultRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline";
 import { Scene } from "@babylonjs/core/scene";
-import havokPhysics from "@babylonjs/havok";
-import { ShadowOnlyMaterial } from "@babylonjs/materials/shadowOnly/shadowOnlyMaterial";
 import { MmdAnimation } from "babylon-mmd/esm/Loader/Animation/mmdAnimation";
 import type { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
 import type { PmxLoader } from "babylon-mmd/esm/Loader/pmxLoader";
@@ -40,27 +36,30 @@ import { SdefInjector } from "babylon-mmd/esm/Loader/sdefInjector";
 import { StreamAudioPlayer } from "babylon-mmd/esm/Runtime/Audio/streamAudioPlayer";
 import { MmdCamera } from "babylon-mmd/esm/Runtime/mmdCamera";
 import type { MmdMesh } from "babylon-mmd/esm/Runtime/mmdMesh";
-import { MmdPhysics } from "babylon-mmd/esm/Runtime/mmdPhysics";
 import { MmdRuntime } from "babylon-mmd/esm/Runtime/mmdRuntime";
-import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 
-import type { ISceneBuilder } from "./MMDRuntime";
+import type { ISceneBuilder, AliveMmdOptions } from "./MMDRuntime";
 
-import { Store } from "tauri-plugin-store-api";
-import { join, resourceDir } from "@tauri-apps/api/path";
 import { listen } from "@tauri-apps/api/event";
-import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 
 type InAnimationLoop = (mmdDancing: boolean) => void;
 
 export class SceneBuilder implements ISceneBuilder {
-    private _mmdCamera: boolean = false;
     private _mmdDancing: boolean = false;
     private _currDuration: number = 0;
     private _loopId: any;
+    private _options: AliveMmdOptions = {
+        mmdAliveUrl: "mmdAliveUrl",
+        mmdCamera: true,
+        paused: false,
+        muted: false
+    };
 
-    public async build(canvas: HTMLCanvasElement, engine: Engine, mmdAliveUrl: string): Promise<Scene> {
+    public async build(canvas: HTMLCanvasElement, engine: Engine, aliveMmdOptions: AliveMmdOptions): Promise<Scene> {
         console.log("SceneBuilder build");
+        this._options = aliveMmdOptions;
+        
+        const mmdAliveUrl = this._options.mmdAliveUrl
 
         // 加载 alive_mmd 设置
         const sets = await fetch(mmdAliveUrl).then((response) => response.json());
@@ -237,8 +236,24 @@ export class SceneBuilder implements ISceneBuilder {
             audioPlayer.source = baseUrl + alive.bgm;
         }
         mmdCamera.setAnimation(currMotion);
-        // 先开启播放，好有些反馈。未见其人，先闻其声。
-        mmdRuntime.playAnimation();
+        // 加载设置。
+        if (this._options.paused) {
+            mmdRuntime.pauseAnimation();
+        } else {
+            mmdRuntime.playAnimation();
+        }
+        if (this._options.muted) {
+            if (!audioPlayer.muted) {
+                audioPlayer.mute();
+            }
+        } else {
+            audioPlayer.unmute();
+        }
+        if (this._options.mmdCamera) {
+            scene.activeCamera = mmdCamera;
+        } else {
+            scene.activeCamera = camera;
+        }
 
         modelMesh.parent = mmdRoot;
 
@@ -253,13 +268,18 @@ export class SceneBuilder implements ISceneBuilder {
         this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
 
         const animteLoop: InAnimationLoop = (mmdDancing) => {
+            audioPlayer.currentTime = 0;
             const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.default_motions);
+            const alive = aliveMotions.find((aliveMotion) => nextMotion === aliveMotion.motion_name)
+            if (alive.bgm !== "") {
+                audioPlayer.source = baseUrl + alive.bgm;
+            }
             mmdRuntime.seekAnimation(0);
             mmdCamera.setAnimation(nextMotion);
+            mmdCamera.animate(0);
             mmdModel.setAnimation(nextMotion);
             this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
-            console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
-            console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
+            console.log("_currDuration:", this._currDuration);
             console.log("currentFrameTime:", mmdRuntime.currentFrameTime);
 
             mmdRuntime.playAnimation();
@@ -318,8 +338,8 @@ export class SceneBuilder implements ISceneBuilder {
 
         await listen('event_change_camera', (event: any) => {
             console.log("event_change_camera");
-            this._mmdCamera = !this._mmdCamera;
-            if (this._mmdCamera) {
+            this._options.mmdCamera = !this._options.mmdCamera;
+            if (this._options.mmdCamera) {
                 scene.activeCamera = mmdCamera;
             } else {
                 scene.activeCamera = camera;
@@ -327,12 +347,27 @@ export class SceneBuilder implements ISceneBuilder {
         });
         await listen('event_pause_animation', (event: any) => {
             const isPaused = event.payload as boolean
+            this._options.paused = isPaused;
             console.log("event_pause_animation ", isPaused);
             if (isPaused) {
-                // mmdRuntime.dispose(scene);
                 mmdRuntime.pauseAnimation();
+                clearTimeout(this._loopId);
             } else {
                 mmdRuntime.playAnimation();
+                // 重新设置定时器
+                this.animationLoop(animteLoop);
+            }
+        });
+        await listen('event_mmd_voice', (event: any) => {
+            const muted = event.payload as boolean
+            this._options.muted = muted;
+            console.log("event_mmd_voice ", muted);
+            if (this._options.muted) {
+                if (!audioPlayer.muted) {
+                    audioPlayer.mute();
+                }
+            } else {
+                audioPlayer.unmute();
             }
         });
         await listen('event_mmd_dancing', (event: any) => {
@@ -354,13 +389,11 @@ export class SceneBuilder implements ISceneBuilder {
             mmdCamera.setAnimation(nextMotion);
             mmdModel.setAnimation(nextMotion);
             this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
-            console.log("runtimeAnimations:", mmdModel.runtimeAnimations);
-            console.log("isAnimationPlaying:", mmdRuntime.isAnimationPlaying);
-            console.log("animationDuration:", mmdRuntime.animationDuration);
 
             mmdRuntime.playAnimation();
+            console.log("mmdRuntime animationDuration:", mmdRuntime.animationDuration);
 
-            // 重新设置定时器，因为需要动画循环
+            // 重新设置定时器
             this.animationLoop(animteLoop);
         });
 
@@ -386,6 +419,7 @@ export class SceneBuilder implements ISceneBuilder {
     }
     private animationLoop(loop: InAnimationLoop) {
         this._loopId = setTimeout(() => {
+            console.log("next animation.");
             // 一个动作完成。
             loop(this._mmdDancing);
             this.animationLoop(loop);
