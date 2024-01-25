@@ -274,6 +274,12 @@ export class SceneBuilder implements ISceneBuilder {
         // 动作循环
         const animteLoop: InAnimationLoop = (mmdDancing) => {
             audioPlayer.currentTime = 0;
+            
+            // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
+            mmdCamera.position = new Vector3(0, 10, 0);
+            mmdCamera.rotation = new Vector3(0, 0, 0);
+            mmdCamera.distance = -33;
+            
             const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.pose_motions);
             const alive = aliveMotions.find((aliveMotion) => nextMotion === aliveMotion.motion_name)
             if (alive.bgm !== "") {
@@ -381,6 +387,10 @@ export class SceneBuilder implements ISceneBuilder {
             
             mmdRuntime.pauseAnimation();
             mmdRuntime.seekAnimation(0);
+            // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
+            mmdCamera.position = new Vector3(0, 10, 0);
+            mmdCamera.rotation = new Vector3(0, 0, 0);
+            mmdCamera.distance = -30;
             this._mmdDancing = dancing;
 
             // 清除掉定时器，不然定时器到时间后就会切换动画
