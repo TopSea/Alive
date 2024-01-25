@@ -105,8 +105,8 @@ export class SceneBuilder implements ISceneBuilder {
         mmdRoot.position.z = 1;
 
         const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
-        mmdCamera.maxZ = 300;
-        mmdCamera.minZ = 1;
+        mmdCamera.maxZ = 500;
+        mmdCamera.minZ = 0.1;
         mmdCamera.distance = -45;
         mmdCamera.parent = mmdRoot;
 
