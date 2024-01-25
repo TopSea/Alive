@@ -58,7 +58,7 @@ export class SceneBuilder implements ISceneBuilder {
     public async build(canvas: HTMLCanvasElement, engine: Engine, aliveMmdOptions: AliveMmdOptions): Promise<Scene> {
         console.log("SceneBuilder build");
         this._options = aliveMmdOptions;
-        
+
         const mmdAliveUrl = this._options.mmdAliveUrl
 
         // 加载 alive_mmd 设置
@@ -141,10 +141,9 @@ export class SceneBuilder implements ISceneBuilder {
         shadowGenerator.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
         shadowGenerator.frustumEdgeFalloff = 0.1;
 
-        // const ground = CreateGround("ground1", { width: 60, height: 60, subdivisions: 2, updatable: false }, scene);
+        // const ground = MeshBuilder.CreateGround("ground1", { width: 60, height: 60, subdivisions: 2, updatable: false }, scene);
         // ground.receiveShadows = true;
         // shadowGenerator.addShadowCaster(ground);
-
 
         // 加载 mmd 背景
         const backgrounds: string[] = sets.default_bg;
@@ -165,14 +164,14 @@ export class SceneBuilder implements ISceneBuilder {
             }
             shadowGenerator.addShadowCaster(mmdBackground);
         })
-
+        
         // 启用物理效果
         // scene.enablePhysics(new Vector3(0, -9.8 * 10, 0), new HavokPlugin(true, await havokPhysics()));
         // const mmdRuntime = new MmdRuntime(scene, new MmdPhysics(scene));
         const mmdRuntime = new MmdRuntime(scene);
         mmdRuntime.loggingEnabled = true
         mmdRuntime.register(scene);
-
+        
         // 音频
         const audioPlayer = new StreamAudioPlayer(scene);
         audioPlayer.preservesPitch = false;
@@ -234,10 +233,8 @@ export class SceneBuilder implements ISceneBuilder {
             mmdCamera.addAnimation(mmdAnimation);
         })
         const currMotion = this.randomAnimation(sets.pose_motions);
-        console.log("currMotion: ", currMotion);
         const alive = aliveMotions.find((aliveMotion) => currMotion === aliveMotion.motion_name)
-        console.log("alive: ", alive);
-        
+
         if (alive.bgm !== "") {
             const trueUrl = this.resolveRelativePath(baseUrl, alive.bgm);
             audioPlayer.source = trueUrl;
@@ -263,7 +260,7 @@ export class SceneBuilder implements ISceneBuilder {
         }
 
         modelMesh.parent = mmdRoot;
-
+        // 添加阴影
         for (const mesh of modelMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
         modelMesh.receiveShadows = true;
 
@@ -274,6 +271,7 @@ export class SceneBuilder implements ISceneBuilder {
         mmdModel.setAnimation(currMotion);
         this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
 
+        // 动作循环
         const animteLoop: InAnimationLoop = (mmdDancing) => {
             audioPlayer.currentTime = 0;
             const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.pose_motions);
@@ -333,13 +331,13 @@ export class SceneBuilder implements ISceneBuilder {
         //     new Quaternion(),
         //     new Vector3(100, 2, 100), scene);
 
-        const defaultPipeline = new DefaultRenderingPipeline("default", true, scene, [mmdCamera, camera]);
-        defaultPipeline.samples = 4;
-        defaultPipeline.bloomEnabled = false;
-        defaultPipeline.chromaticAberrationEnabled = true;
-        defaultPipeline.chromaticAberration.aberrationAmount = 1;
-        defaultPipeline.depthOfFieldEnabled = false;
-        defaultPipeline.fxaaEnabled = true;
+        // const defaultPipeline = new DefaultRenderingPipeline("default", true, scene, [mmdCamera, camera]);
+        // defaultPipeline.samples = 4;
+        // defaultPipeline.bloomEnabled = false;
+        // defaultPipeline.chromaticAberrationEnabled = true;
+        // defaultPipeline.chromaticAberration.aberrationAmount = 1;
+        // defaultPipeline.depthOfFieldEnabled = false;
+        // defaultPipeline.fxaaEnabled = true;
 
         // if you want to use inspector, uncomment following line.
         // Inspector.Show(scene, { });
@@ -406,6 +404,23 @@ export class SceneBuilder implements ISceneBuilder {
             this.animationLoop(animteLoop);
         });
 
+
+
+
+
+
+
+
+
+
+
+
+
+        // const mmdMesh = await SceneLoader.ImportMeshAsync("", baseUrl + sets.mmd_model, "", scene)
+        //     .then((result) => result.meshes[0] as MmdMesh);
+        // for (const mesh of mmdMesh.metadata.meshes) mesh.receiveShadows = true;
+        // shadowGenerator.addShadowCaster(mmdMesh);
+
         return scene;
     }
 
@@ -439,7 +454,7 @@ export class SceneBuilder implements ISceneBuilder {
     private resolveRelativePath(base: string, relative: string): string {
         const baseUrl = new URL(base);
         const resolvedUrl = new URL(relative, baseUrl);
-        
+
         return "https://asset.localhost" + resolvedUrl.pathname;
     }
 }

@@ -2,8 +2,8 @@
 import { Engine } from "@babylonjs/core/Engines/engine";
 
 import { AliveMmdOptions, BaseRuntime } from "./MMDRuntime";
-import { SceneBuilder } from "./MMDSceneBuilder";
-// import { SceneBuilder } from "./MMDBuilder";
+// import { SceneBuilder } from "./MMDSceneBuilder";
+import { SceneBuilder } from "./MMDBuilder";
 import { onMounted, ref } from "vue";
 import {
   ArrowPathIcon, CameraIcon, PlayIcon, PauseIcon, Cog6ToothIcon, SpeakerWaveIcon, SpeakerXMarkIcon,
