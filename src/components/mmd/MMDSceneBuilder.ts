@@ -149,9 +149,12 @@ export class SceneBuilder implements ISceneBuilder {
         // 加载 mmd 背景
         const backgrounds: string[] = sets.default_bg;
         backgrounds.forEach(async (background) => {
+            const trueUrl = this.resolveRelativePath(baseUrl, background);
+            console.log("trueUrl 2: ", trueUrl);
+
             const mmdBackground = await SceneLoader.ImportMeshAsync(
                 "",
-                baseUrl + background,
+                trueUrl,
                 "",
                 scene,
                 (event) => updateLoadingText(1, `Loading background... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
@@ -230,10 +233,14 @@ export class SceneBuilder implements ISceneBuilder {
         mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
             mmdCamera.addAnimation(mmdAnimation);
         })
-        const currMotion = this.randomAnimation(sets.default_motions);
+        const currMotion = this.randomAnimation(sets.pose_motions);
+        console.log("currMotion: ", currMotion);
         const alive = aliveMotions.find((aliveMotion) => currMotion === aliveMotion.motion_name)
+        console.log("alive: ", alive);
+        
         if (alive.bgm !== "") {
-            audioPlayer.source = baseUrl + alive.bgm;
+            const trueUrl = this.resolveRelativePath(baseUrl, alive.bgm);
+            audioPlayer.source = trueUrl;
         }
         mmdCamera.setAnimation(currMotion);
         // 加载设置。
@@ -269,10 +276,11 @@ export class SceneBuilder implements ISceneBuilder {
 
         const animteLoop: InAnimationLoop = (mmdDancing) => {
             audioPlayer.currentTime = 0;
-            const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.default_motions);
+            const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.pose_motions);
             const alive = aliveMotions.find((aliveMotion) => nextMotion === aliveMotion.motion_name)
             if (alive.bgm !== "") {
-                audioPlayer.source = baseUrl + alive.bgm;
+                const trueUrl = this.resolveRelativePath(baseUrl, alive.bgm);
+                audioPlayer.source = trueUrl;
             }
             mmdRuntime.seekAnimation(0);
             mmdCamera.setAnimation(nextMotion);
@@ -380,10 +388,11 @@ export class SceneBuilder implements ISceneBuilder {
             // 清除掉定时器，不然定时器到时间后就会切换动画
             clearTimeout(this._loopId);
 
-            const nextMotion = this.randomAnimation(dancing ? sets.dance_motions : sets.default_motions);
+            const nextMotion = this.randomAnimation(dancing ? sets.dance_motions : sets.pose_motions);
             const alive = aliveMotions.find((aliveMotion) => nextMotion === aliveMotion.motion_name)
             if (alive.bgm !== "") {
-                audioPlayer.source = baseUrl + alive.bgm;
+                const trueUrl = this.resolveRelativePath(baseUrl, alive.bgm);
+                audioPlayer.source = trueUrl;
             }
 
             mmdCamera.setAnimation(nextMotion);
@@ -405,7 +414,9 @@ export class SceneBuilder implements ISceneBuilder {
 
         motions.forEach(
             (motion) => {
-                motionUrls.push(baseUrl + motion);
+                const trueUrl = this.resolveRelativePath(baseUrl, motion);
+                console.log("trueUrl 1: ", trueUrl);
+                motionUrls.push(trueUrl);
             }
         )
         return motionUrls;
@@ -424,5 +435,11 @@ export class SceneBuilder implements ISceneBuilder {
             loop(this._mmdDancing);
             this.animationLoop(loop);
         }, this._currDuration);
+    }
+    private resolveRelativePath(base: string, relative: string): string {
+        const baseUrl = new URL(base);
+        const resolvedUrl = new URL(relative, baseUrl);
+        
+        return "https://asset.localhost" + resolvedUrl.pathname;
     }
 }
