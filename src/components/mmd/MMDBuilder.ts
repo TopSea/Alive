@@ -107,6 +107,7 @@ export class SceneBuilder implements ISceneBuilder {
         const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
         mmdCamera.maxZ = 300;
         mmdCamera.minZ = 1;
+        mmdCamera.distance = -45;
         mmdCamera.parent = mmdRoot;
 
         const camera = new ArcRotateCamera("arcRotateCamera", 0, 0, 45 * worldScale, new Vector3(0, 10 * worldScale, 1), scene);
@@ -141,10 +142,6 @@ export class SceneBuilder implements ISceneBuilder {
         shadowGenerator.filteringQuality = ShadowGenerator.QUALITY_MEDIUM;
         shadowGenerator.frustumEdgeFalloff = 0.1;
 
-        // const ground = MeshBuilder.CreateGround("ground1", { width: 60, height: 60, subdivisions: 2, updatable: false }, scene);
-        // ground.receiveShadows = true;
-        // shadowGenerator.addShadowCaster(ground);
-
         // 加载 mmd 背景
         const backgrounds: string[] = sets.default_bg;
         backgrounds.forEach(async (background) => {
@@ -160,11 +157,12 @@ export class SceneBuilder implements ISceneBuilder {
             )
                 .then((result) => result.meshes[0] as MmdMesh);
             for (const mesh of mmdBackground.metadata.meshes) {
+                mesh.parent = mmdRoot;
                 mesh.receiveShadows = true;
             }
             shadowGenerator.addShadowCaster(mmdBackground);
         })
-        
+
         // 启用物理效果
         // scene.enablePhysics(new Vector3(0, -9.8 * 10, 0), new HavokPlugin(true, await havokPhysics()));
         // const mmdRuntime = new MmdRuntime(scene, new MmdPhysics(scene));
@@ -390,7 +388,7 @@ export class SceneBuilder implements ISceneBuilder {
             // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
             mmdCamera.position = new Vector3(0, 10, 0);
             mmdCamera.rotation = new Vector3(0, 0, 0);
-            mmdCamera.distance = -30;
+            mmdCamera.distance = -33;
             this._mmdDancing = dancing;
 
             // 清除掉定时器，不然定时器到时间后就会切换动画
