@@ -56,7 +56,7 @@ export class SceneBuilder implements ISceneBuilder {
         paused: false,
         muted: false
     };
-    private _aliveExtra: any;
+    private _aliveExtra: any = null;
 
     public async build(canvas: HTMLCanvasElement, engine: Engine, aliveMmdOptions: AliveMmdOptions): Promise<Scene> {
         console.log("SceneBuilder build");
@@ -107,7 +107,7 @@ export class SceneBuilder implements ISceneBuilder {
         mmdRoot.scaling.scaleInPlace(worldScale);
         mmdRoot.position.z = 1;
 
-        const mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
+        var mmdCamera = new MmdCamera("mmdCamera", new Vector3(0, 10, 0), scene);
         mmdCamera.maxZ = 500;
         mmdCamera.minZ = 0.1;
         mmdCamera.distance = -45;
@@ -258,6 +258,25 @@ export class SceneBuilder implements ISceneBuilder {
             ));
         }
 
+        // 等待所有 extra 加载完成
+        if (extraPromises.length ===  2) {
+            console.log("load extra....");
+            
+            const [extraAnimation, { meshes: [extraMesh] }] = await Promise.all(extraPromises);
+            if (!((_mmdAnimation: any): _mmdAnimation is MmdAnimation => true)(extraAnimation)) throw new Error("unreachable");
+            if (!((_mesh: any): _mesh is MmdMesh => true)(extraMesh)) throw new Error("unreachable");
+
+            extraMesh.parent = mmdRoot;
+
+            for (const mesh of extraMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
+            extraMesh.receiveShadows = true;
+
+            const extraModel = mmdRuntime.createMmdModel(extraMesh);
+            extraModel.addAnimation(extraAnimation);
+            extraModel.setAnimation("extra_motion");
+            this._aliveExtra = extraModel;
+        }
+
         if (alive.bgm !== "") {
             const trueUrl = this.resolveRelativePath(baseUrl, alive.bgm);
             audioPlayer.source = trueUrl;
@@ -292,36 +311,11 @@ export class SceneBuilder implements ISceneBuilder {
             mmdModel.addAnimation(mmdAnimation);
         })
 
-        // 等待所有 extra 加载完成
-        if (extraPromises.length ===  2) {
-            console.log("load extra....");
-            
-            const [extraAnimation, { meshes: [extraMesh] }] = await Promise.all(extraPromises);
-            if (!((_mmdAnimation: any): _mmdAnimation is MmdAnimation => true)(extraAnimation)) throw new Error("unreachable");
-            if (!((_mesh: any): _mesh is MmdMesh => true)(extraMesh)) throw new Error("unreachable");
-
-            extraMesh.parent = mmdRoot;
-
-            for (const mesh of extraMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
-            extraMesh.receiveShadows = true;
-
-            const extraModel = mmdRuntime.createMmdModel(extraMesh);
-            extraModel.addAnimation(extraAnimation);
-            extraModel.setAnimation("extra_motion");
-
-
-            // 骨骼绑定
-            // const bodyBone = mmdModel.runtimeBones.find((bone) => bone.name === "右手首") as IMmdRuntimeBone;
-            // extraMesh.attachToBone(bodyBone, new TransformNode());
-        }
-
-
-
         mmdModel.setAnimation(currMotion);
         this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
 
         // 动作循环
-        const animteLoop: InAnimationLoop = (mmdDancing) => {
+        const animteLoop: InAnimationLoop = async (mmdDancing) => {
             audioPlayer.currentTime = 0;
             
             // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
@@ -330,40 +324,56 @@ export class SceneBuilder implements ISceneBuilder {
             mmdCamera.distance = -33;
 
             // 删除场景中的 extra
-            // for (let i = 0; i < this._runtimeBg.length ; i++) {
-            //     const bgModel = this._runtimeBg.pop() as MmdModel;
-            //     mmdRuntime.destroyMmdModel(bgModel);
-            // }
+            const extraModel = this._aliveExtra as MmdModel;
+            if (extraModel !== null) {
+                mmdRuntime.destroyMmdModel(extraModel);
+                extraModel.dispose();
+                extraModel.mesh.dispose();
+                this._aliveExtra = null;
+            }
             
             const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.pose_motions);
             const alive = aliveMotions.find((aliveMotion) => nextMotion === aliveMotion.motion_name);
 
             // 加载下个场景中的 extra
-            // const nextBg: string[] = alive.bg;
-            // nextBg.forEach(async (bgPath) => {
-            //     const trueUrl = this.resolveRelativePath(baseUrl, bgPath);
-
-            //     const runtimeBg = await SceneLoader.ImportMeshAsync(
-            //         "",
-            //         trueUrl,
-            //         "",
-            //         scene,
-            //         (event) => updateLoadingText(1, `Loading background... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
-            //     )
-            //         .then((result) => result.meshes[0] as MmdMesh);
-            //     for (const mesh of runtimeBg.metadata.meshes) {
-            //         mesh.parent = mmdRoot;
-            //         mesh.receiveShadows = true;
-            //         const bgModel = mmdRuntime.createMmdModel(mesh);
-            //         mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
-            //             bgModel.addAnimation(mmdAnimation);
-            //         })
-            //         bgModel.setAnimation("pose2");
-            //         this._runtimeBg.push(bgModel);
-            //     }
-            // })
-            // // 隐藏加载显示
-            // scene.onAfterRenderObservable.addOnce(() => engine.hideLoadingUI());
+            const extraPromises: Promise<any>[] = [];
+        
+            const extraMotions: any[] =  alive.extra.e_motions;
+            extraPromises.push(vmdLoader.loadAsync("extra_motion", this.getMotionUrl(baseUrl, extraMotions),
+                (event) => updateLoadingText(0, `Loading extra motion... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`))
+            );
+    
+            const extraAliveMmdModel: string = alive.extra.e_model;
+            if (extraAliveMmdModel !== "") {
+                extraPromises.push(SceneLoader.ImportMeshAsync(
+                    extraAliveMmdModel.replace(".pmx", ""),
+                    baseUrl + extraAliveMmdModel,
+                    "",
+                    scene,
+                    (event) => updateLoadingText(1, `Loading extra model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
+                ));
+            }
+    
+            // 等待所有 extra 加载完成
+            if (extraPromises.length ===  2) {
+                console.log("load extra....");
+                
+                const [extraAnimation, { meshes: [extraMesh] }] = await Promise.all(extraPromises);
+                if (!((_mmdAnimation: any): _mmdAnimation is MmdAnimation => true)(extraAnimation)) throw new Error("unreachable");
+                if (!((_mesh: any): _mesh is MmdMesh => true)(extraMesh)) throw new Error("unreachable");
+    
+                extraMesh.parent = mmdRoot;
+    
+                for (const mesh of extraMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
+                extraMesh.receiveShadows = true;
+    
+                const extraModel = mmdRuntime.createMmdModel(extraMesh);
+                extraModel.addAnimation(extraAnimation);
+                extraModel.setAnimation("extra_motion");
+                this._aliveExtra = extraModel;
+            }
+            // 隐藏加载显示
+            scene.onAfterRenderObservable.addOnce(() => engine.hideLoadingUI());
             
 
             if (alive.bgm !== "") {
@@ -466,7 +476,7 @@ export class SceneBuilder implements ISceneBuilder {
                 audioPlayer.unmute();
             }
         });
-        await listen('event_mmd_dancing', (event: any) => {
+        await listen('event_mmd_dancing', async (event: any) => {
             const dancing = event.payload as boolean;
             
             mmdRuntime.pauseAnimation();
@@ -474,14 +484,65 @@ export class SceneBuilder implements ISceneBuilder {
             // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
             mmdCamera.position = new Vector3(0, 10, 0);
             mmdCamera.rotation = new Vector3(0, 0, 0);
-            mmdCamera.distance = -33;
+            mmdCamera.distance = -45;
+            mmdCamera.fov = 0.8;
             this._mmdDancing = dancing;
 
             // 清除掉定时器，不然定时器到时间后就会切换动画
             clearTimeout(this._loopId);
 
+            // 删除场景中的 extra
+            const extraModel = this._aliveExtra as MmdModel;
+            if (extraModel !== null) {
+                mmdRuntime.destroyMmdModel(extraModel);
+                extraModel.dispose();
+                extraModel.mesh.dispose();
+                this._aliveExtra = null;
+            }
+
             const nextMotion = this.randomAnimation(dancing ? sets.dance_motions : sets.pose_motions);
             const alive = aliveMotions.find((aliveMotion) => nextMotion === aliveMotion.motion_name)
+            
+            // 加载下个场景中的 extra
+            const extraPromises: Promise<any>[] = [];
+        
+            const extraMotions: any[] =  alive.extra.e_motions;
+            extraPromises.push(vmdLoader.loadAsync("extra_motion", this.getMotionUrl(baseUrl, extraMotions),
+                (event) => updateLoadingText(0, `Loading extra motion... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`))
+            );
+    
+            const extraAliveMmdModel: string = alive.extra.e_model;
+            if (extraAliveMmdModel !== "") {
+                extraPromises.push(SceneLoader.ImportMeshAsync(
+                    extraAliveMmdModel.replace(".pmx", ""),
+                    baseUrl + extraAliveMmdModel,
+                    "",
+                    scene,
+                    (event) => updateLoadingText(1, `Loading extra model... ${event.loaded}/${event.total} (${Math.floor(event.loaded * 100 / event.total)}%)`)
+                ));
+            }
+    
+            // 等待所有 extra 加载完成
+            if (extraPromises.length ===  2) {
+                console.log("load extra....");
+                
+                const [extraAnimation, { meshes: [extraMesh] }] = await Promise.all(extraPromises);
+                if (!((_mmdAnimation: any): _mmdAnimation is MmdAnimation => true)(extraAnimation)) throw new Error("unreachable");
+                if (!((_mesh: any): _mesh is MmdMesh => true)(extraMesh)) throw new Error("unreachable");
+    
+                extraMesh.parent = mmdRoot;
+    
+                for (const mesh of extraMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
+                extraMesh.receiveShadows = true;
+    
+                const extraModel = mmdRuntime.createMmdModel(extraMesh);
+                extraModel.addAnimation(extraAnimation);
+                extraModel.setAnimation("extra_motion");
+                this._aliveExtra = extraModel;
+            }
+            // 隐藏加载显示
+            scene.onAfterRenderObservable.addOnce(() => engine.hideLoadingUI());
+            // 加载 bgm
             if (alive.bgm !== "") {
                 const trueUrl = this.resolveRelativePath(baseUrl, alive.bgm);
                 audioPlayer.source = trueUrl;

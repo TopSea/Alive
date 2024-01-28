@@ -56,20 +56,20 @@ onBeforeMount(() => {
     });
   }
 
-  refreshLive2dModels()
+  refreshMmdModels()
 })
 
-async function refreshLive2dModels() {
-  const modelPath = await join(resourceDirPath, 'live2d');
+async function refreshMmdModels() {
+  const modelPath = await join(resourceDirPath, 'mmd');
   const entries = await readDir(modelPath, { recursive: true });
-  findLive2dModels(entries);
+  findMmdModels(entries);
 }
-async function findLive2dModels(models: FileEntry[]) {
+async function findMmdModels(models: FileEntry[]) {
   for (const model of models) {
     // console.log(`Entry: ${model.path}`);
 
     if (model.children) {
-      findLive2dModels(model.children)
+      findMmdModels(model.children)
     } else {
       if (model.name?.endsWith(".alive_mmd.json")) {
         if (allModelNames.value.indexOf(model.name) === -1) {
@@ -145,7 +145,7 @@ async function setSettings(key: string, val: any) {
 async function addModel(modelURL: string) {
   console.log("addModel: ", modelURL);
 
-  if (modelURL !== "" && modelURL.startsWith("http") && (modelURL.endsWith("model3.json") || modelURL.endsWith("model.json"))) {
+  if (modelURL !== "" && modelURL.startsWith("http") && (modelURL.endsWith("alive_mmd.json"))) {
 
     sHttpModels.value.push(modelURL)
 
@@ -198,7 +198,7 @@ async function addModel(modelURL: string) {
           <button class="flex" @onClick="">
             <PlusIcon @click="addingModel = !addingModel" class="stroke-2 w-6 h-6 text-slate-900 hover:text-slate-500" />
           </button>
-          <button class="flex" @onClick="refreshLive2dModels">
+          <button class="flex" @onClick="refreshMmdModels">
             <ArrowPathIcon class="stroke-2 w-6 h-6 text-slate-900 hover:text-slate-500" />
           </button>
         </div>
