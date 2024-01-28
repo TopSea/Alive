@@ -130,11 +130,11 @@ onMounted(() => {
 
 
 <template>
-  <div class="w-full h-full static border border-gray-100 border-dashed">
-    <canvas ref="live2d_canvas" class="w-full h-full"></canvas>
+  <div class="w-full h-full static group/menu-mmd">
+    <canvas ref="live2d_canvas" class="w-full h-full group-hover/menu-mmd:border border-dashed border-gray-100"></canvas>
 
     <ul v-if="isModelReady" data-tauri-drag-region
-      class="absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-white/30">
+      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-white/30">
       <li class="w-8 h-8" @click="reloadPage">
         <ArrowPathIcon class="icon-menu" />
       </li>

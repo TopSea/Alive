@@ -1215,6 +1215,11 @@ video {
   border-radius: 1rem;
 }
 
+.hover\:border-gray-100:hover {
+  --tw-border-opacity: 1;
+  border-color: rgb(243 244 246 / var(--tw-border-opacity));
+}
+
 .hover\:text-blue-400:hover {
   --tw-text-opacity: 1;
   color: rgb(96 165 250 / var(--tw-text-opacity));
@@ -1228,4 +1233,20 @@ video {
 .hover\:text-zinc-500:hover {
   --tw-text-opacity: 1;
   color: rgb(113 113 122 / var(--tw-text-opacity));
+}
+
+.group\/menu:hover .group-hover\/menu\:visible {
+  visibility: visible;
+}
+
+.group\/menu-mmd:hover .group-hover\/menu-mmd\:visible {
+  visibility: visible;
+}
+
+.group\/menu:hover .group-hover\/menu\:border {
+  border-width: 1px;
+}
+
+.group\/menu-mmd:hover .group-hover\/menu-mmd\:border {
+  border-width: 1px;
 }
