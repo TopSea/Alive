@@ -236,7 +236,10 @@ async function setModel(model: string) {
         :class="activeTab === 'Alive' ? 'sets-tab-selected' : 'sets-tab'">Alive</button>
       <button @click="() => changeTab('Live2d')"
         :class="activeTab === 'Live2d' ? 'sets-tab-selected' : 'sets-tab'">Live2d</button>
-      <button @click="() => changeTab('MMD')" :class="activeTab === 'MMD' ? 'sets-tab-selected' : 'sets-tab'">MMD</button>
+      <button @click="() => changeTab('MMD')" 
+        :class="activeTab === 'MMD' ? 'sets-tab-selected' : 'sets-tab'">MMD</button>
+      <button @click="() => changeTab('About')" 
+        :class="activeTab === 'About' ? 'sets-tab-selected' : 'sets-tab'">About</button>
     </div>
 
     <div v-if="activeTab === 'Alive'" :class="activeTab === 'Alive' ? 'sets-content' : ''">
@@ -267,7 +270,7 @@ async function setModel(model: string) {
         @refresh-models="refreshModels" @set-model="setModel" @add-model="addingModel = !addingModel" />
     </div>
 
-    <div v-else="activeTab === 'MMD'" :class="activeTab === 'MMD' ? 'sets-content' : ''">
+    <div v-else-if="activeTab === 'MMD'" :class="activeTab === 'MMD' ? 'sets-content' : ''">
       <SettingModels v-bind:models-title="'Choose MMD model: '" v-bind:curr-model="currMmdModel"
         v-bind:models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel"
         @add-model="addingModel = !addingModel" />
@@ -280,6 +283,42 @@ async function setModel(model: string) {
       <button class="font-bold hover:text-blue-400">submit</button>
       </div>
     </div> -->
+    </div>
+    
+    <div v-else="activeTab === 'About'" :class="activeTab === 'About' ? 'sets-content' : ''">
+      <div class="flex pt-6 px-8 items-center">
+        <img class="object-cover h-32 w-32 rounded-lg shadow-md hover:shadow-blue-300" src="/app-icon.png" alt="">
+        <ul class="pl-8 flex flex-col space-y-2">
+          <li class="flex">
+            <h3 class=" font-bold">开源项目地址：</h3>
+            <a href="https://github.com/TopSea/Alive" target="_blank">https://github.com/TopSea/Alive</a>
+          </li>
+          <li class="flex">
+            <h3 class=" font-bold">关于作者：</h3>
+            <a href="https://space.bilibili.com/307219768" target="_blank">https://space.bilibili.com/307219768</a>
+          </li>
+          <li class="flex">
+            <h3 class=" font-bold">支持项目：</h3>
+            <a href="https://afdian.net/a/GoAHi" target="_blank">https://afdian.net/a/GoAHi</a>
+          </li>
+          <li class="flex">
+            <h3 class=" font-bold">当前版本：</h3>
+            <p class="">0.0.1-alpha</p>
+            <a class="pl-8 font-bold hover:text-blue-950" href="https://github.com/TopSea/Alive" target="_blank">检查更新</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="grow flex flex-col pt-4 px-8">
+        <h3 class="font-bold">赞助者：</h3>
+        <ul class="pl-8 flex flex-col space-y-2">
+          <li class="flex">
+            <a href="https://afdian.net/a/GoAHi" target="_blank">
+              <p class="">当前还没有赞助者，快来占据沙发吧~</p>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
 
     <AddModelDialog v-if="addingModel" @event-close="addingModel = false" @event-submit="addModel" />
