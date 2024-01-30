@@ -15,7 +15,7 @@ export interface AliveMmdOptions {
     mmdAliveUrl: string; 
     mmdCamera: boolean;
     paused: boolean;
-    muted: boolean;
+    volume: number;
 }
 
 export class BaseRuntime {

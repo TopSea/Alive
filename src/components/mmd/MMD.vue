@@ -13,15 +13,17 @@ import { FilmIcon } from '@heroicons/vue/24/outline'
 import { emit as tauriEmit } from '@tauri-apps/api/event';
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
+import NumChange from "../NumChange.vue";
 
 const resourceDirPath = await resourceDir();
 const path = await join(resourceDirPath, 'data', 'sets_mmd.json');
 const store = new Store(path);
 const mmdAliveUrl = await store.get("mmd_alive_url") as string;
-const sMuted = ref(await store.get("is_muted") as boolean)
+const sVolume = ref(await store.get("volume") as number)
 const sMmdCamera = ref(await store.get("is_mmd_camera") as boolean)
 const sPaused = ref(await store.get("is_paused") as boolean)
 
+const isVolumeChanging = ref(false)
 const dancing = ref(false)
 const mmd_canvas = ref();
 
@@ -47,10 +49,18 @@ async function mmdDancing() {
 async function openSettings() {
   await tauriEmit('event_open_settings', true);
 }
-async function changeModelVoice() {
-  sMuted.value = !sMuted.value
-  await tauriEmit('event_mmd_voice', sMuted.value);
-  await store.set("mmd_voice", sMuted.value);
+async function changeModelVoice(isAdding: boolean) {
+  if (isAdding) {
+    if (sVolume.value < 1) {
+      sVolume.value += 0.1;
+    }
+  } else {
+    if (sVolume.value > 0) {
+      sVolume.value -= 0.1;
+    }
+  }
+  await tauriEmit('event_mmd_voice', sVolume.value);
+  await store.set("mmd_voice", sVolume.value);
   await store.save();
 }
 
@@ -72,7 +82,7 @@ onMounted(() => {
       mmdAliveUrl: mmdAliveUrl,
       mmdCamera: sMmdCamera.value,
       paused: sPaused.value,
-      muted: sMuted.value
+      volume: sVolume.value
   }
 
   BaseRuntime.Create({
@@ -97,10 +107,20 @@ onMounted(() => {
       <li class="w-8 h-8" @click="changeCamera">
         <CameraIcon class="icon-menu" />
       </li>
-      <li class="w-8 h-8" @click="changeModelVoice">
-        <SpeakerWaveIcon v-if="sMuted" class="icon-menu" />
-        <SpeakerXMarkIcon v-else class="icon-menu" />
+      
+      <li class="w-8 h-8">
+        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="'w-8 h-8 text-blue-800 brightness-200 blur-sm'" />
+        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="'w-8 h-8 text-blue-800 brightness-200 blur-sm'" />
+        <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }" :class="isVolumeChanging ? 'w-8 h-8 text-blue-800 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
+        <SpeakerXMarkIcon v-else @click="() => { isVolumeChanging = !isVolumeChanging }"
+          :class="isVolumeChanging ? 'w-8 h-8 text-blue-800 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
+        <NumChange v-if="isVolumeChanging" :posTop="112" @minus-event="() => { changeModelVoice(false) }"
+          @plus-event="() => { changeModelVoice(true) }" />
       </li>
+      <!-- <li class="w-8 h-8" @click="changeModelVoice">
+        <SpeakerWaveIcon v-if="sVolume" class="icon-menu" />
+        <SpeakerXMarkIcon v-else class="icon-menu" />
+      </li> -->
       <li class="w-8 h-8" @click="pauseAnimation">
         <PauseIcon v-if="!sPaused" class="icon-menu" />
         <PlayIcon v-else class="icon-menu" />

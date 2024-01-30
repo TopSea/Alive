@@ -42,7 +42,7 @@ import type { ISceneBuilder, AliveMmdOptions } from "./MMDRuntime";
 
 import { listen } from "@tauri-apps/api/event";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
-import { IMmdRuntimeBone } from "babylon-mmd/esm/Runtime/IMmdRuntimeBone";
+import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 
 type InAnimationLoop = (mmdDancing: boolean) => void;
 
@@ -54,7 +54,7 @@ export class SceneBuilder implements ISceneBuilder {
         mmdAliveUrl: "mmdAliveUrl",
         mmdCamera: true,
         paused: false,
-        muted: false
+        volume: 0.8
     };
     private _aliveExtra: any = null;
 
@@ -175,6 +175,7 @@ export class SceneBuilder implements ISceneBuilder {
         
         // 音频
         const audioPlayer = new StreamAudioPlayer(scene);
+        audioPlayer.volume = this._options.volume;
         audioPlayer.preservesPitch = false;
         mmdRuntime.setAudioPlayer(audioPlayer);
 
@@ -288,7 +289,7 @@ export class SceneBuilder implements ISceneBuilder {
         } else {
             mmdRuntime.playAnimation();
         }
-        if (this._options.muted) {
+        if (this._options.volume) {
             if (!audioPlayer.muted) {
                 audioPlayer.mute();
             }
@@ -465,16 +466,10 @@ export class SceneBuilder implements ISceneBuilder {
             }
         });
         await listen('event_mmd_voice', (event: any) => {
-            const muted = event.payload as boolean
-            this._options.muted = muted;
-            console.log("event_mmd_voice ", muted);
-            if (this._options.muted) {
-                if (!audioPlayer.muted) {
-                    audioPlayer.mute();
-                }
-            } else {
-                audioPlayer.unmute();
-            }
+            const volume = event.payload as number
+            this._options.volume = volume;
+            audioPlayer.volume = volume;
+            console.log("event_mmd_voice ", volume);
         });
         await listen('event_mmd_dancing', async (event: any) => {
             const dancing = event.payload as boolean;
