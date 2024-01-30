@@ -53,14 +53,18 @@ async function changeModelVoice(isAdding: boolean) {
   if (isAdding) {
     if (sVolume.value < 1) {
       sVolume.value += 0.1;
+    } else {
+      sVolume.value = 1;
     }
   } else {
     if (sVolume.value > 0) {
       sVolume.value -= 0.1;
+    } else {
+      sVolume.value = 0;
     }
   }
   await tauriEmit('event_mmd_voice', sVolume.value);
-  await store.set("mmd_voice", sVolume.value);
+  await store.set("volume", sVolume.value);
   await store.save();
 }
 
