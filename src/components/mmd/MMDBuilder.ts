@@ -26,7 +26,6 @@ import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
 import { Color4 } from "@babylonjs/core/Maths/math.color";
 import { Matrix, Vector3 } from "@babylonjs/core/Maths/math.vector";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
-import { DefaultRenderingPipeline } from "@babylonjs/core/PostProcesses/RenderPipeline/Pipelines/defaultRenderingPipeline";
 import { Scene } from "@babylonjs/core/scene";
 import { MmdAnimation } from "babylon-mmd/esm/Loader/Animation/mmdAnimation";
 import type { MmdStandardMaterialBuilder } from "babylon-mmd/esm/Loader/mmdStandardMaterialBuilder";
@@ -42,7 +41,6 @@ import type { ISceneBuilder, AliveMmdOptions } from "./MMDRuntime";
 
 import { listen } from "@tauri-apps/api/event";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
-import { MmdPlayerControl } from "babylon-mmd/esm/Runtime/Util/mmdPlayerControl";
 
 type InAnimationLoop = (mmdDancing: boolean) => void;
 
@@ -443,7 +441,7 @@ export class SceneBuilder implements ISceneBuilder {
         // if you want to use inspector, uncomment following line.
         // Inspector.Show(scene, { });
 
-        await listen('event_change_camera', (event: any) => {
+        await listen('event_change_camera', (_event: any) => {
             console.log("event_change_camera");
             this._options.mmdCamera = !this._options.mmdCamera;
             if (this._options.mmdCamera) {

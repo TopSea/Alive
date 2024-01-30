@@ -4,6 +4,10 @@ import { ref } from 'vue';
 const emit = defineEmits(['event-close', 'event-submit'])
 const modelURL = ref("")
 
+function handleInput(event: any) {
+  modelURL.value = event.target.value
+}
+
 function submitModel() {
     console.log("url", modelURL.value);
     
@@ -19,7 +23,7 @@ function submitModel() {
      rounded-xl border-[3px] border-slate-600 shadow-xl space-y-2" @click.stop="">
         <h2 class="text-md pb-3 font-bold">Url path of your live2d model: </h2>
         <div class=" flex items-center space-x-2">
-          <input :value="modelURL" @input="(event) => {modelURL = event.target.value}" type="text" class=" h-8 w-96 bg-slate-200 rounded-md border-2 border-slate-500 px-1" />
+          <input :value="modelURL" @input="handleInput" type="text" class=" h-8 w-96 bg-slate-200 rounded-md border-2 border-slate-500 px-1" />
           <button @click.stop="submitModel" class="font-bold hover:text-blue-400">submit</button>
         </div>
       </div>
