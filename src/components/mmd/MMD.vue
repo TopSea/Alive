@@ -10,7 +10,7 @@ import {
   FilmIcon as DancingIcon
 } from '@heroicons/vue/24/solid'
 import { FilmIcon } from '@heroicons/vue/24/outline'
-import { emit as tauriEmit } from '@tauri-apps/api/event';
+import { listen, emit as tauriEmit } from '@tauri-apps/api/event';
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import NumChange from "../NumChange.vue";
@@ -31,6 +31,15 @@ function reloadPage() {
   location.reload()
 }
 
+
+async function listenEvents() {
+  console.log("listenEvents");
+  
+  await listen('event_mmd_url', (_event: any) => {
+    console.log("event_model_url");
+    reloadPage()
+  });
+}
 async function changeCamera() {
   await tauriEmit('event_change_camera', true);
 }
@@ -70,6 +79,7 @@ async function changeModelVoice(isAdding: boolean) {
 
 onMounted(() => {
   console.log("MMD onMounted");
+  listenEvents()
   const mmdCanvas = mmd_canvas.value as HTMLCanvasElement
 
   const engine = new Engine(mmdCanvas, true, {

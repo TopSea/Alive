@@ -89,7 +89,7 @@ function getModelName(modelUrl: string): string {
 }
 
 async function refreshModels(_is_mmd: boolean) {
-    console.log("refreshModels: ", _is_mmd);
+  console.log("refreshModels: ", _is_mmd);
   const modelPath = _is_mmd ? await join(resourceDirPath, 'mmd') : await join(resourceDirPath, 'live2d');
   const entries = await readDir(modelPath, { recursive: true });
   findModels(entries, _is_mmd);
@@ -161,57 +161,71 @@ async function setSettings(key: string, val: any) {
   }
 }
 async function setModel(model: string) {
-  const key = "model_url";
+  console.log("setModel: ", model);
   const mainWindow = WebviewWindow.getByLabel('main')
-  var foundURL = allLivePaths.value.find(
-    (element) => {
-      const path = element.replace(/\\/g, "/");
-      return path.indexOf(model) !== -1;
-    }
-  );
-  if (foundURL !== undefined) {
-    const http = foundURL.replace(resourceDirPath, "https://asset.localhost/");
-    const url = http.replace(/\\/g, "/");
-    console.log("foundURL: ", url);
-    if (activeTab.value === "MMD") {
+
+  if (activeTab.value === "MMD") {
+    var foundURL = allMmdPaths.value.find(
+      (element) => {
+        const path = element.replace(/\\/g, "/");
+        return path.indexOf(model) !== -1;
+      }
+    );
+
+    if (foundURL !== undefined) {
+      const http = foundURL.replace(resourceDirPath, "https://asset.localhost/");
+      const url = http.replace(/\\/g, "/");
+      console.log("foundURL: ", url);
       currMmdModel.value = model
-      await storeMMD.set(key, url);
+      await storeMMD.set("mmd_alive_url", url);
       await storeMMD.save();
-      mainWindow?.emit('event_model_url', url);
-    } else {
+      mainWindow?.emit('event_mmd_url', url);
+    }
+  } else {
+    var foundURL = allLivePaths.value.find(
+      (element) => {
+        const path = element.replace(/\\/g, "/");
+        return path.indexOf(model) !== -1;
+      }
+    );
+
+    if (foundURL !== undefined) {
+      const http = foundURL.replace(resourceDirPath, "https://asset.localhost/");
+      const url = http.replace(/\\/g, "/");
+      console.log("foundURL: ", url);
       currLiveModel.value = model
-      await storeLive.set(key, url);
+      await storeLive.set("model_url", url);
       await storeLive.save();
-      mainWindow?.emit('event_model_url', url);
+      mainWindow?.emit('event_live2d_url', url);
     }
   }
 }
 
-async function addModel(modelURL: string) {
-  console.log("addModel: ", modelURL);
-  const modelName = getModelName(modelURL)
-  if (modelURL === "") return
+  async function addModel(modelURL: string) {
+    console.log("addModel: ", modelURL);
+    const modelName = getModelName(modelURL)
+    if (modelURL === "") return
 
-  if (activeTab.value === "MMD" && modelURL.startsWith("http") && (modelURL.endsWith("alive_mmd.json"))) {
-    sMmdHttps.value.push(modelURL)
-    allMmdPaths.value.push(modelURL)
-    allMmdNames.value.push(modelName)
+    if (activeTab.value === "MMD" && modelURL.startsWith("http") && (modelURL.endsWith("alive_mmd.json"))) {
+      sMmdHttps.value.push(modelURL)
+      allMmdPaths.value.push(modelURL)
+      allMmdNames.value.push(modelName)
 
-    await storeMMD.set("http_models", sMmdHttps.value)
-    await storeMMD.save()
-    addingModel.value = false
+      await storeMMD.set("http_models", sMmdHttps.value)
+      await storeMMD.save()
+      addingModel.value = false
 
-  } else if (activeTab.value === "Live2d" && modelURL.startsWith("http") && (modelURL.endsWith("model3.json") || modelURL.endsWith("model.json"))) {
-    sLiveHttps.value.push(modelURL)
+    } else if (activeTab.value === "Live2d" && modelURL.startsWith("http") && (modelURL.endsWith("model3.json") || modelURL.endsWith("model.json"))) {
+      sLiveHttps.value.push(modelURL)
 
-    allLivePaths.value.push(modelURL)
-    allLiveNames.value.push(modelName)
+      allLivePaths.value.push(modelURL)
+      allLiveNames.value.push(modelName)
 
-    await storeLive.set("http_models", sLiveHttps.value)
-    await storeLive.save()
-    addingModel.value = false
+      await storeLive.set("http_models", sLiveHttps.value)
+      await storeLive.save()
+      addingModel.value = false
+    }
   }
-}
 
 </script>
 
@@ -249,15 +263,14 @@ async function addModel(modelURL: string) {
     </div>
 
     <div v-else-if="activeTab === 'Live2d'" :class="activeTab === 'Live2d' ? 'sets-content' : ''">
-      <SettingModels :models-title="'Choose Live2d model: '" :curr-model="currLiveModel" 
-       :models="allLiveNames" @refresh-models="refreshModels" @set-model="setModel" 
-       @add-model="addingModel = !addingModel"/>
+      <SettingModels :models-title="'Choose Live2d model: '" :curr-model="currLiveModel" :models="allLiveNames"
+        @refresh-models="refreshModels" @set-model="setModel" @add-model="addingModel = !addingModel" />
     </div>
 
     <div v-else="activeTab === 'MMD'" :class="activeTab === 'MMD' ? 'sets-content' : ''">
-      <SettingModels v-bind:models-title="'Choose MMD model: '" v-bind:curr-model="currMmdModel" 
-       v-bind:models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel" 
-       @add-model="addingModel = !addingModel"/>
+      <SettingModels v-bind:models-title="'Choose MMD model: '" v-bind:curr-model="currMmdModel"
+        v-bind:models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel"
+        @add-model="addingModel = !addingModel" />
 
       <!-- <div id="add_model_dialog" v-show="addingModel" class=" absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-200 z-10 py-4 px-6 
      rounded-xl border-[3px] border-slate-600 shadow-xl space-y-2">

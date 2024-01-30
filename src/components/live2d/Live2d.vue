@@ -73,13 +73,7 @@ async function changeModelUD(isPlus: boolean) {
 
 
 async function listenEvents() {
-  console.log("listenEvents");
-
-  await listen('event_voice', (event: any) => {
-    changeModelVoice(event.payload as boolean)
-  });
-
-  await listen('event_model_url', (_event: any) => {
+  await listen('event_live2d_url', (_event: any) => {
     reloadPage()
   });
 }
