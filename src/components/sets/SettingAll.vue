@@ -5,7 +5,7 @@ import { enable, disable } from "tauri-plugin-autostart-api";
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { Ref, onBeforeMount, ref } from "vue";
 import {
-  CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon, ArrowDownOnSquareStackIcon
+  CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon, ArrowDownOnSquareStackIcon, InformationCircleIcon
 } from '@heroicons/vue/24/outline'
 
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
@@ -336,8 +336,14 @@ async function setModel(model: string) {
             <a href="https://afdian.net/a/GoAHi" target="_blank">https://afdian.net/a/GoAHi</a>
           </li>
           <li class="flex">
-            <h3 class=" font-bold">当前版本：</h3>
-            <p class="">{{aliveVersion}}</p>
+            <div class="flex">
+              <h3 class=" font-bold">当前版本：</h3>
+              <p class="">{{ aliveVersion + '-alpha'}}</p>
+              <div class=" relative flex group/build-info">
+                <InformationCircleIcon class="w-5 h-5 ml-2 justify-self-end self-center text-orange-300"/>
+                <p class=" invisible group-hover/build-info:visible w-44 absolute left-5 top-5 px-4 py-2 rounded-lg border-2 shadow-md border-orange-300 bg-orange-50">当前为 alpha 版本，运行时很可能会遇到问题！</p>
+              </div>
+            </div>
             <button class="ml-8 font-bold hover:text-blue-300" @click="aliveCheckUpdate">检查更新</button>
           </li>
         </ul>
