@@ -9,8 +9,16 @@ import {
 } from '@heroicons/vue/24/outline'
 
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
+import { checkUpdate } from "@tauri-apps/api/updater";
+import { getVersion, getName, getTauriVersion } from "@tauri-apps/api/app";
+
 import AddModelDialog from "./AddModelDialog.vue";
 import SettingModels from "./SettingModels.vue";
+
+const aliveVersion = ref(await getVersion());
+const aliveAppName = ref(await getName());
+const tauriVersion = ref(await getTauriVersion());
+const showUpdate = ref(false);
 
 const resourceDirPath = await resourceDir();
 const pathAlive = await join(resourceDirPath, 'data', 'sets_alive.json');
@@ -47,6 +55,12 @@ function changeTab(tab: string) {
   activeTab.value = tab
 }
 
+async function aliveCheckUpdate() {
+  console.log("checking update...");
+  
+  const { shouldUpdate } = await checkUpdate();
+  showUpdate.value = shouldUpdate;
+}
 
 onBeforeMount(() => {
   const sCurrLive = sLiveUrl.value
@@ -287,7 +301,10 @@ async function setModel(model: string) {
     
     <div v-else="activeTab === 'About'" :class="activeTab === 'About' ? 'sets-content' : ''">
       <div class="flex pt-6 px-8 items-center">
-        <img class="object-cover h-32 w-32 rounded-lg shadow-md hover:shadow-blue-300" src="/app-icon.png" alt="">
+        <div class=" relative h-32 w-32 rounded-lg shadow-md bg-slate-400 group/app-icon hover:shadow-blue-300">
+          <img class="object-cover h-32 w-32" src="/app-icon.png" alt="" />
+          <p class="w-full invisible group-hover/app-icon:visible absolute bottom-0 italic bg-gray-300 text-blue-300 justify-self-center">{{ aliveAppName + ', by TopSea' }}</p>
+        </div>
         <ul class="pl-8 flex flex-col space-y-2">
           <li class="flex">
             <h3 class=" font-bold">开源项目地址：</h3>
@@ -303,8 +320,8 @@ async function setModel(model: string) {
           </li>
           <li class="flex">
             <h3 class=" font-bold">当前版本：</h3>
-            <p class="">0.0.1-alpha</p>
-            <a class="pl-8 font-bold hover:text-blue-950" href="https://github.com/TopSea/Alive" target="_blank">检查更新</a>
+            <p class="">{{aliveVersion}}</p>
+            <button class="ml-8 font-bold hover:text-blue-300" @click="aliveCheckUpdate">检查更新</button>
           </li>
         </ul>
       </div>
@@ -314,7 +331,7 @@ async function setModel(model: string) {
         <ul class="pl-8 flex flex-col space-y-2">
           <li class="flex">
             <a href="https://afdian.net/a/GoAHi" target="_blank">
-              <p class="">当前还没有赞助者，快来占据沙发吧~</p>
+              <p class="">当前没有赞助者，快来占据沙发吧~</p>
             </a>
           </li>
         </ul>

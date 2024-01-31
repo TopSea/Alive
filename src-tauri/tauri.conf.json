@@ -65,6 +65,17 @@
     "systemTray": {
       "iconPath": "icons/icon.png",
       "iconAsTemplate": true
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
+      ],
+      "dialog": true,
+      "windows": {
+        "installMode": "passive"
+      },
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDcxODBGM0UxQ0Q3RkY1MTkKUldRWjlYL040Zk9BY2NrU3VsU3JVcHo4QVBoRDFWM2NvcnM4NFgzU1NybTUxTUNHb3ZVQnp0VE4K"
     }
   }
 }
