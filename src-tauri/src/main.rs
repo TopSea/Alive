@@ -17,6 +17,7 @@ fn main() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
             let window = app.get_window("main").unwrap();
+            let _ = window.set_skip_taskbar(true);
 
             // 读取并设置窗口大小和位置的信息
             let stores = app.state::<StoreCollection<Wry>>();
