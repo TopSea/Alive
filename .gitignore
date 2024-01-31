@@ -24,4 +24,3 @@ dist-ssr
 *.sw?
 src-tauri/live2d/aisaikesi_4/*
 src-tauri/live2d/abeikelongbi_3/*
-src-tauri/mmd/*
