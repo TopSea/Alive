@@ -1,9 +1,7 @@
 {
     "what_is_this_file": "A specification file for Alive to play mmd motions",
     "mmd_model": "芙卡洛斯.pmx",
-    "bg": [],
-    "default_bg": [
-    ],
+    "default_bg": [],
     "alive_motions": [
         {
             "motion_name": "pose2",
@@ -19,7 +17,10 @@
         },
         {
             "motion_name": "dance1",
-            "motions": [],
+            "motions": [
+                "../motion/丘丘摇/丘丘摇.vmd",
+                "../motion/丘丘摇/丘丘摇-相机.vmd"
+            ],
             "bgm": "",
             "extra": {
                 "e_model": "",
