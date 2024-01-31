@@ -5,19 +5,19 @@ import { enable, disable } from "tauri-plugin-autostart-api";
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { Ref, onBeforeMount, ref } from "vue";
 import {
-  CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon
+  CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon, ArrowDownOnSquareStackIcon
 } from '@heroicons/vue/24/outline'
 
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
 import { checkUpdate } from "@tauri-apps/api/updater";
-import { getVersion, getName, getTauriVersion } from "@tauri-apps/api/app";
+import { getVersion, getName } from "@tauri-apps/api/app";
 
 import AddModelDialog from "./AddModelDialog.vue";
 import SettingModels from "./SettingModels.vue";
 
 const aliveVersion = ref(await getVersion());
 const aliveAppName = ref(await getName());
-const tauriVersion = ref(await getTauriVersion());
+// const tauriVersion = ref(await getTauriVersion());
 const showUpdate = ref(false);
 
 const resourceDirPath = await resourceDir();
@@ -34,6 +34,7 @@ const addingModel = ref(false);
 const sClickThroughe = ref(await storeAlive.get("click_through") as boolean)
 const sStayTop = ref(await storeAlive.get("stay_top") as boolean)
 const sAutoStart = ref(await storeAlive.get("auto_start") as boolean)
+const sAutoCheck = ref(await storeAlive.get("auto_check") as boolean)
 const isMMD = ref(await storeAlive.get("is_mmd") as boolean);
 const sLiveHttps = ref(await storeLive.get("http_models") as string[])
 const sLiveUrl = ref(await storeLive.get("model_url") as string)
@@ -57,7 +58,6 @@ function changeTab(tab: string) {
 
 async function aliveCheckUpdate() {
   console.log("checking update...");
-  
   const { shouldUpdate } = await checkUpdate();
   showUpdate.value = shouldUpdate;
 }
@@ -171,6 +171,17 @@ async function setSettings(key: string, val: any) {
       await storeAlive.save();
       break;
     }
+    case "auto_check": {
+      sAutoCheck.value = val as boolean
+      if (val) {
+        enable();
+      } else {
+        disable();
+      }
+      await storeAlive.set(key, val);
+      await storeAlive.save();
+      break;
+    }
     default: { }
   }
 }
@@ -258,23 +269,29 @@ async function setModel(model: string) {
 
     <div v-if="activeTab === 'Alive'" :class="activeTab === 'Alive' ? 'sets-content' : ''">
       <div class="h-20 grid grid-cols-2 grid-rows-2">
-        <button class="flex h-full items-center mx-4 px-4 space-x-3">
+        <button class="flex h-full items-center mx-4 space-x-3">
           <CursorArrowRaysIcon class=" w-6 h-6" />
-          <span class="w-28 text-left">Click Through</span>
+          <span class="w-44 text-left">Click Through</span>
           <input type="checkbox" class="w-4 h-4" :checked="sClickThroughe"
             @change="() => { setSettings('click_through', !sClickThroughe) }" />
         </button>
-        <button class="flex h-full items-center mx-4 px-4 space-x-3">
+        <button class="flex h-full items-center mx-4 space-x-3">
           <ArrowUpTrayIcon class=" w-6 h-6" />
-          <span class="w-28 text-left">Stay at top</span>
+          <span class="w-44 text-left">Stay at top</span>
           <input type="checkbox" class="w-4 h-4" :checked="sStayTop"
             @change="() => { setSettings('stay_top', !sStayTop) }" />
         </button>
-        <button class="flex h-full items-center mx-4 px-4 space-x-3">
+        <button class="flex h-full items-center mx-4 space-x-3">
           <RocketLaunchIcon class=" w-6 h-6" />
-          <span class="w-28 text-left">Start at launch</span>
+          <span class="w-44 text-left">Start at launch</span>
           <input type="checkbox" class="w-4 h-4" :checked="sAutoStart"
             @change="() => { setSettings('auto_start', !sAutoStart) }" />
+        </button>
+        <button class="flex h-full items-center mx-4 space-x-3">
+          <ArrowDownOnSquareStackIcon class=" w-6 h-6" />
+          <span class="w-44 text-left">Auto download update</span>
+          <input type="checkbox" class="w-4 h-4" :checked="sAutoCheck"
+            @change="() => { setSettings('auto_check', !sAutoCheck) }" />
         </button>
       </div>
     </div>

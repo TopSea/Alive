@@ -69,7 +69,8 @@
     "updater": {
       "active": true,
       "endpoints": [
-        "https://releases.myapp.com/{{target}}/{{arch}}/{{current_version}}"
+        "https://gitee.com/topsea/alive-release/raw/master/alive_latest.json",
+        "https://raw.githubusercontent.com/TopSea/Alive/main/docs/alive_latest.json"
       ],
       "dialog": true,
       "windows": {

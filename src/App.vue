@@ -9,6 +9,7 @@ import { WebviewWindow } from "@tauri-apps/api/window";
 
 var settingsOpened = false
 const isMMD = ref()
+const autoCheck = ref()
 
 async function getIsMMD() {
   const resourceDirPath = await resourceDir();
@@ -16,6 +17,7 @@ async function getIsMMD() {
   console.log("path: ", path);
   const store = new Store(path);
   isMMD.value = await store.get("is_mmd") as boolean
+  autoCheck.value = await store.get("auto_check") as boolean
 }
 async function listenEvents() {
   await listen('event_is_mmd', (event: any) => {

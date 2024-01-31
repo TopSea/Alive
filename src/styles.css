@@ -945,6 +945,10 @@ video {
   width: 100lvw;
 }
 
+.w-44 {
+  width: 11rem;
+}
+
 .flex-1 {
   flex: 1 1 0%;
 }

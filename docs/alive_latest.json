@@ -1,7 +1,7 @@
 {
   "version": "v0.0.1",
   "notes": "Alpha version",
-  "pub_date": "2020-06-22T19:25:57Z",
+  "pub_date": "2024-02-02T22:00:00Z",
   "platforms": {
     "windows-x86_64": {
       "signature": "Content of app.msi.sig",
