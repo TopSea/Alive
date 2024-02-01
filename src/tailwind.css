@@ -10,10 +10,10 @@
         @apply invisible flex h-8 rotate-90 items-center bg-gradient-to-l from-zinc-400 rounded-xl absolute -right-8 
     }
     .sets-tab {
-        @apply bg-gray-300 text-slate-800 rounded-t-lg px-2 py-1 hover:text-slate-600
+        @apply rounded-t-lg px-2 py-1
     }
-    .sets-tab-selected {
-        @apply bg-blue-300 text-slate-600 rounded-t-lg px-2 py-1
+    .sets-check {
+        @apply form-checkbox rounded w-4 h-4 outline-none focus:outline-dashed
     }
     .sets-item {
         @apply flex flex-row items-center bg-gradient-to-r from-gray-300 border-2 rounded-xl mx-4 hover:mx-2 border-gray-300

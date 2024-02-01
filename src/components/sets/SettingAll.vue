@@ -44,6 +44,13 @@ console.log("sLiveUrl: ", sLiveUrl, "sMmdUrl: ", sMmdUrl)
 const currMmdModel = ref("")
 const currLiveModel = ref("")
 
+// 样式
+const txt = ref("text-blue-950")
+const txtLight = ref("text-blue-400")
+const txtLink = ref("hover:text-blue-800")
+const bg = ref("bg-blue-50")
+const bgActive = ref("bg-blue-300")
+const bgInactive = ref("bg-gray-300")
 
 const allLiveNames: Ref<string[]> = ref([]);
 const allLivePaths: Ref<string[]> = ref([]);
@@ -255,55 +262,57 @@ async function setModel(model: string) {
 </script>
 
 <template>
-  <div class="flex flex-col w-lvw h-lvh bg-blue-50">
+  <div :class="[bg,'flex flex-col w-lvw h-lvh']">
     <div class="flex space-x-2 mt-1 mx-1">
       <button @click="() => changeTab('Alive')"
-        :class="activeTab === 'Alive' ? 'sets-tab-selected' : 'sets-tab'">Alive</button>
+        :class="activeTab === 'Alive' ? [bgActive,txt,'sets-tab'] : [bgInactive,txt,txtLink,'sets-tab']">Alive</button>
       <button @click="() => changeTab('Live2d')"
-        :class="activeTab === 'Live2d' ? 'sets-tab-selected' : 'sets-tab'">Live2d</button>
+        :class="activeTab === 'Live2d' ? [bgActive,txt,'sets-tab'] : [bgInactive,txt,txtLink,'sets-tab']">Live2d</button>
       <button @click="() => changeTab('MMD')" 
-        :class="activeTab === 'MMD' ? 'sets-tab-selected' : 'sets-tab'">MMD</button>
+        :class="activeTab === 'MMD' ? [bgActive,txt,'sets-tab'] : [bgInactive,txt,txtLink,'sets-tab']">MMD</button>
       <button @click="() => changeTab('About')" 
-        :class="activeTab === 'About' ? 'sets-tab-selected' : 'sets-tab'">About</button>
+        :class="activeTab === 'About' ? [bgActive,txt,'sets-tab'] : [bgInactive,txt,txtLink,'sets-tab']">About</button>
     </div>
 
     <div v-if="activeTab === 'Alive'" :class="activeTab === 'Alive' ? 'sets-content' : ''">
-      <div class="h-20 grid grid-cols-2 grid-rows-2">
-        <button class="flex h-full items-center mx-4 space-x-3">
-          <CursorArrowRaysIcon class=" w-6 h-6" />
-          <span class="w-44 text-left">Click Through</span>
-          <input type="checkbox" class="w-4 h-4" :checked="sClickThroughe"
+      <ul class="h-20 grid grid-cols-2 grid-rows-2">
+        <li class="flex h-full items-center mx-4 space-x-3">
+          <CursorArrowRaysIcon :class="[txt,'w-6 h-6']" />
+          <span :class="[txt,'w-44 text-left']">Click Through</span>
+          <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sClickThroughe"
             @change="() => { setSettings('click_through', !sClickThroughe) }" />
-        </button>
-        <button class="flex h-full items-center mx-4 space-x-3">
-          <ArrowUpTrayIcon class=" w-6 h-6" />
-          <span class="w-44 text-left">Stay at top</span>
-          <input type="checkbox" class="w-4 h-4" :checked="sStayTop"
+        </li>
+        <li class="flex h-full items-center mx-4 space-x-3">
+          <ArrowUpTrayIcon :class="[txt,'w-6 h-6']" />
+          <span :class="[txt,'w-44 text-left']">Stay at top</span>
+          <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sStayTop"
             @change="() => { setSettings('stay_top', !sStayTop) }" />
-        </button>
-        <button class="flex h-full items-center mx-4 space-x-3">
-          <RocketLaunchIcon class=" w-6 h-6" />
-          <span class="w-44 text-left">Start at launch</span>
-          <input type="checkbox" class="w-4 h-4" :checked="sAutoStart"
+        </li>
+        <li class="flex h-full items-center mx-4 space-x-3">
+          <RocketLaunchIcon :class="[txt,'w-6 h-6']" />
+          <span :class="[txt,'w-44 text-left']">Start at launch</span>
+          <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sAutoStart"
             @change="() => { setSettings('auto_start', !sAutoStart) }" />
-        </button>
-        <button class="flex h-full items-center mx-4 space-x-3">
-          <ArrowDownOnSquareStackIcon class=" w-6 h-6" />
-          <span class="w-44 text-left">Auto download update</span>
-          <input type="checkbox" class="w-4 h-4" :checked="sAutoCheck"
+        </li>
+        <li class="flex h-full items-center mx-4 space-x-3">
+          <ArrowDownOnSquareStackIcon :class="[txt,'w-6 h-6']" />
+          <span :class="[txt,'w-44 text-left']">Auto download update</span>
+          <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sAutoCheck"
             @change="() => { setSettings('auto_check', !sAutoCheck) }" />
-        </button>
-      </div>
+        </li>
+      </ul>
     </div>
 
     <div v-else-if="activeTab === 'Live2d'" :class="activeTab === 'Live2d' ? 'sets-content' : ''">
-      <SettingModels :models-title="'Choose Live2d model: '" :curr-model="currLiveModel" :models="allLiveNames"
+      <SettingModels :txt="txt" :txt-link="txtLink" :bg-active="bgActive" :bg-inactive="bgInactive" 
+      :models-title="'Choose Live2d model: '" :curr-model="currLiveModel" :models="allLiveNames"
         @refresh-models="refreshModels" @set-model="setModel" @add-model="addingModel = !addingModel" />
     </div>
 
     <div v-else-if="activeTab === 'MMD'" :class="activeTab === 'MMD' ? 'sets-content' : ''">
-      <SettingModels v-bind:models-title="'Choose MMD model: '" v-bind:curr-model="currMmdModel"
-        v-bind:models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel"
+      <SettingModels :txt="txt" :txt-link="txtLink" :bg-active="bgActive" :bg-inactive="bgInactive" 
+       :models-title="'Choose MMD model: '" :curr-model="currMmdModel"
+       :models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel"
         @add-model="addingModel = !addingModel" />
 
       <!-- <div id="add_model_dialog" v-show="addingModel" class=" absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-200 z-10 py-4 px-6 
@@ -319,42 +328,42 @@ async function setModel(model: string) {
     <div v-else="activeTab === 'About'" :class="activeTab === 'About' ? 'sets-content' : ''">
       <div class="flex pt-6 px-8 items-center">
         <div class=" relative h-32 w-32 rounded-lg shadow-md bg-slate-400 group/app-icon hover:shadow-blue-300">
-          <img class="object-cover h-32 w-32" src="/app-icon.png" alt="" />
+          <img class="object-cover h-32 w-32 rounded-lg" src="/app-icon.png" alt="" />
           <p class="w-full invisible group-hover/app-icon:visible absolute bottom-0 italic bg-gray-300 text-blue-300 justify-self-center">{{ aliveAppName + ', by TopSea' }}</p>
         </div>
         <ul class="pl-8 flex flex-col space-y-2">
           <li class="flex">
-            <h3 class=" font-bold">开源项目地址：</h3>
-            <a href="https://github.com/TopSea/Alive" target="_blank">https://github.com/TopSea/Alive</a>
+            <h3 :class="[txt,'font-bold']">开源项目地址：</h3>
+            <a href="https://github.com/TopSea/Alive" target="_blank" :class="[txt,txtLink]">https://github.com/TopSea/Alive</a>
           </li>
           <li class="flex">
-            <h3 class=" font-bold">关于作者：</h3>
-            <a href="https://space.bilibili.com/307219768" target="_blank">https://space.bilibili.com/307219768</a>
+            <h3 :class="[txt,'font-bold']">关于作者：</h3>
+            <a href="https://space.bilibili.com/307219768" target="_blank" :class="[txt,txtLink]">https://space.bilibili.com/307219768</a>
           </li>
           <li class="flex">
-            <h3 class=" font-bold">支持项目：</h3>
-            <a href="https://afdian.net/a/GoAHi" target="_blank">https://afdian.net/a/GoAHi</a>
+            <h3 :class="[txt,'font-bold']">支持项目：</h3>
+            <a href="https://afdian.net/a/GoAHi" target="_blank" :class="[txt,txtLink]">https://afdian.net/a/GoAHi</a>
           </li>
           <li class="flex">
             <div class="flex">
-              <h3 class=" font-bold">当前版本：</h3>
-              <p class="">{{ aliveVersion + '-alpha'}}</p>
+              <h3 :class="[txt,'font-bold']">当前版本：</h3>
+              <p :class="txt">{{ aliveVersion + '-alpha'}}</p>
               <div class=" relative flex group/build-info">
                 <InformationCircleIcon class="w-5 h-5 ml-2 justify-self-end self-center text-orange-300"/>
                 <p class=" invisible group-hover/build-info:visible w-44 absolute left-5 top-5 px-4 py-2 rounded-lg border-2 shadow-md border-orange-300 bg-orange-50">当前为 alpha 版本，运行时很可能会遇到问题！</p>
               </div>
             </div>
-            <button class="ml-8 font-bold hover:text-blue-300" @click="aliveCheckUpdate">检查更新</button>
+            <button :class="[txt,txtLink,'ml-8 font-bold']" @click="aliveCheckUpdate">检查更新</button>
           </li>
         </ul>
       </div>
 
       <div class="grow flex flex-col pt-4 px-8">
-        <h3 class="font-bold">赞助者：</h3>
+        <h3 class="font-bold text-blue-950">赞助者：</h3>
         <ul class="pl-8 flex flex-col space-y-2">
           <li class="flex">
-            <a href="https://afdian.net/a/GoAHi" target="_blank">
-              <p class="">当前没有赞助者，快来占据沙发吧~</p>
+            <a href="https://afdian.net/a/GoAHi" target="_blank" :class="[txt,txtLink]">
+              当前没有赞助者，快来占据沙发吧~
             </a>
           </li>
         </ul>
