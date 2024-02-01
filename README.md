@@ -1,6 +1,20 @@
-# Alive：支持 Live2d 和 MMD 模型的开源桌宠软件
+<div style="display: flex; width: 100%; gap: 1rem;">
+<img style="width: 10.5rem; height: 10.5rem; border-radius: 0.5rem;" src="./public/app-icon.png" alt="App Icon"/></a>
 
-![Alive](./public/app-icon.png)
+<div align="center" style="height: 10.5rem; display: flex; flex-direction: column; align-items: center;">
+
+<i>Alive：支持 Live2d 和 MMD 模型的开源桌宠软件。</i>
+
+<a href="https://github.com/TopSea/Alive/stargazers"><img src="https://img.shields.io/github/stars/TopSea/Alive" alt="Stars Badge"/></a>
+<a href="https://github.com/TopSea/Alive/pulls"><img src="https://img.shields.io/github/issues-pr/TopSea/Alive" alt="Pull Requests Badge"/></a>
+<a href="https://github.com/TopSea/Alive/issues"><img src="https://img.shields.io/github/issues/TopSea/Alive" alt="Issues Badge"/></a>
+<a href="https://github.com/TopSea/Alive/graphs/contributors"><img alt="GitHub contributors" src="https://img.shields.io/github/contributors/TopSea/Alive?color=2b9348"></a>
+<br>
+<a href="https://github.com/TopSea/Alive/blob/master/LICENSE"><img src="https://img.shields.io/github/license/TopSea/Alive?color=2b9348" alt="License Badge"/></a>
+<a href="https://github.com/TopSea/Alive/releases"><img src="https://img.shields.io/github/downloads/TopSea/Alive/total" alt="Download Badge"/></a>
+
+</div>
+</div>
 
 ## 开发进度
 0.0.1-alpha 已发布！
@@ -56,3 +70,8 @@ MMD：babylonjs 和 babylon-mmd。
 然后就搜怎么提取怎么展示。搜到了 PPet，但是用着不太符合我的想法而且 PPet 项目也好久没更新了。所以就打算自己改改来用，但是 electron 这个包死活下不下来，换镜像用代理都不行。淦！刚好当时学 Tauri 和 React 有一段时间了，干脆再造个轮子。  
 
 最开始是用 Tauri 和 React 写的（[Live2d-Tauri](https://github.com/TopSea/Live2d-Tauri)），但是写的不是很好。就打算用 vue 再再造个轮子顺便也让我在原神中的老婆们能展示展示，所以 Alive 就诞生了。
+
+
+
+
+[app-icon]: ./public/app-icon.png
