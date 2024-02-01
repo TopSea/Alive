@@ -1,7 +1,7 @@
-<div style="display: flex; width: 100%; gap: 1rem;">
-<img style="width: 10.5rem; height: 10.5rem; border-radius: 0.5rem;" src="./public/app-icon.png" alt="App Icon"/></a>
+<div style="display: flex; width: 100%; gap: 16px;">
+<img style="width: 156px; height: 156px; border-radius: 12px;" src="./public/app-icon.png" alt="App Icon"/></a>
 
-<div align="center" style="height: 10.5rem; display: flex; flex-direction: column; align-items: center;">
+<div align="center" style="height: 156px; display: flex; flex-direction: column; align-items: center;">
 
 <i>Alive：支持 Live2d 和 MMD 模型的开源桌宠软件。</i>
 
