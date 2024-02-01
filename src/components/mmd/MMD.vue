@@ -23,6 +23,9 @@ const sVolume = ref(await store.get("volume") as number)
 const sMmdCamera = ref(await store.get("is_mmd_camera") as boolean)
 const sPaused = ref(await store.get("is_paused") as boolean)
 
+const txt = ref("text-gray-950")
+const txtHover = ref("hover:text-blue-950")
+
 const isVolumeChanging = ref(false)
 const dancing = ref(false)
 const mmd_canvas = ref();
@@ -112,39 +115,35 @@ onMounted(() => {
 
 <template>
   <div class="w-full h-full static group/menu-mmd">
-    <canvas ref="mmd_canvas" class="w-full h-full group-hover/menu-mmd:border border-dashed border-gray-100"></canvas>
+    <canvas ref="mmd_canvas" class="w-full h-full group-hover/menu-mmd:border-2 border-dashed border-gray-100"></canvas>
     <ul data-tauri-drag-region
-      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-white/30">
+      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-[#93C5FD]/30">
       <li class="w-8 h-8" @click="reloadPage">
-        <ArrowPathIcon class="icon-menu" />
+        <ArrowPathIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
       <li class="w-8 h-8" @click="changeCamera">
-        <CameraIcon class="icon-menu" />
+        <CameraIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
       
       <li class="w-8 h-8">
-        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="'w-8 h-8 text-blue-800 brightness-200 blur-sm'" />
-        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="'w-8 h-8 text-blue-800 brightness-200 blur-sm'" />
-        <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }" :class="isVolumeChanging ? 'w-8 h-8 text-blue-800 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
+        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="'w-8 h-8 text-blue-400 blur-sm'" />
+        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="'w-8 h-8 text-blue-400 blur-sm'" />
+        <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }" :class="isVolumeChanging ? 'w-8 h-8 text-blue-500 relative -top-8 ' : ' w-8 h-8 text-gray-950 hover:text-blue-950'" />
         <SpeakerXMarkIcon v-else @click="() => { isVolumeChanging = !isVolumeChanging }"
-          :class="isVolumeChanging ? 'w-8 h-8 text-blue-800 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
+          :class="isVolumeChanging ? 'w-8 h-8 text-blue-400 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
         <NumChange v-if="isVolumeChanging" :posTop="112" @minus-event="() => { changeModelVoice(false) }"
           @plus-event="() => { changeModelVoice(true) }" />
       </li>
-      <!-- <li class="w-8 h-8" @click="changeModelVoice">
-        <SpeakerWaveIcon v-if="sVolume" class="icon-menu" />
-        <SpeakerXMarkIcon v-else class="icon-menu" />
-      </li> -->
       <li class="w-8 h-8" @click="pauseAnimation">
-        <PauseIcon v-if="!sPaused" class="icon-menu" />
-        <PlayIcon v-else class="icon-menu" />
+        <PauseIcon v-if="!sPaused" :class="[txt,txtHover,'w-8 h-8']" />
+        <PlayIcon v-else :class="[txt,txtHover,'w-8 h-8']" />
       </li>
       <li class="w-8 h-8" @click="mmdDancing">
-        <FilmIcon class="icon-menu" v-if="!dancing" />
-        <DancingIcon class="icon-menu" v-else />
+        <FilmIcon :class="[txt,txtHover,'w-8 h-8']" v-if="!dancing" />
+        <DancingIcon :class="[txt,txtHover,'w-8 h-8']" v-else />
       </li>
       <li class="w-8 h-8" @click="openSettings">
-        <Cog6ToothIcon class="icon-menu" />
+        <Cog6ToothIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
     </ul>
   </div>

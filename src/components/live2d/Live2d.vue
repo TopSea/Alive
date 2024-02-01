@@ -26,6 +26,9 @@ const sModelScale = ref(await store.get("model_scale") as number)
 const sModelX = ref(await store.get("model_x") as number)
 const sModelY = ref(await store.get("model_y") as number)
 
+const txt = ref("text-gray-950")
+const txtHover = ref("hover:text-blue-950")
+
 console.log("modelURL:", modelURL);
 
 const live2d_canvas = ref();
@@ -125,43 +128,43 @@ onMounted(() => {
 
 <template>
   <div class="w-full h-full static group/menu-mmd">
-    <canvas ref="live2d_canvas" class="w-full h-full group-hover/menu-mmd:border border-dashed border-gray-100"></canvas>
+    <canvas ref="live2d_canvas" class="w-full h-full group-hover/menu-mmd:border-2 border-dashed border-gray-100"></canvas>
 
     <ul v-if="isModelReady" data-tauri-drag-region
       class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-white/30">
       <li class="w-8 h-8" @click="reloadPage">
-        <ArrowPathIcon class="icon-menu" />
+        <ArrowPathIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
       <li class="w-8 h-8">
-        <SpeakerWaveIcon v-if="sModelVoice" class="icon-menu" @click="changeModelVoice(!sModelVoice)" />
-        <SpeakerXMarkIcon v-else class="icon-menu" @click="changeModelVoice(!sModelVoice)" />
+        <SpeakerWaveIcon v-if="sModelVoice" :class="[txt,txtHover,'w-8 h-8']" @click="changeModelVoice(!sModelVoice)" />
+        <SpeakerXMarkIcon v-else :class="[txt,txtHover,'w-8 h-8']" @click="changeModelVoice(!sModelVoice)" />
       </li>
 
       <li class=" w-8 h-8">
-        <MagnifyingGlassPlusIcon v-if="isModelZooming" :class="'w-8 h-8 text-blue-800 brightness-200 blur-sm'" />
+        <MagnifyingGlassPlusIcon v-if="isModelZooming" :class="'w-8 h-8 text-blue-400 brightness-120 blur-sm'" />
         <MagnifyingGlassPlusIcon
           @click="() => { isModelZooming = !isModelZooming; isModelUDing = false; isModelLRing = false; }"
-          :class="isModelZooming ? 'w-8 h-8 text-blue-800 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
+          :class="isModelZooming ? 'w-8 h-8 text-blue-500 relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
         <NumChange v-if="isModelZooming" v-bind:posTop="112" @minus-event="() => { changeModelZoom(false) }"
           @plus-event="() => { changeModelZoom(true) }" />
       </li>
       <li class="w-8 h-8">
-        <ArrowsRightLeftIcon v-if="isModelLRing" :class="'w-8 h-8 text-blue-800 brightness-200 blur-sm'" />
+        <ArrowsRightLeftIcon v-if="isModelLRing" :class="'w-8 h-8 text-blue-400 brightness-120 blur-sm'" />
         <ArrowsRightLeftIcon
           @click="() => { isModelLRing = !isModelLRing; isModelUDing = false; isModelZooming = false; }"
-          :class="isModelLRing ? 'w-8 h-8 text-blue-800 relative -top-8 ' : 'icon-menu'" />
+          :class="isModelLRing ? 'w-8 h-8 text-blue-500 relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
         <NumChange v-if="isModelLRing" v-bind:posTop="159" @minus-event="() => { changeModelLR(false) }"
           @plus-event="() => { changeModelLR(true) }" />
       </li>
       <li class=" w-8 h-8 group/tb">
-        <ArrowsUpDownIcon v-if="isModelUDing" :class="'w-8 h-8 text-blue-800 brightness-200 blur-sm'" />
+        <ArrowsUpDownIcon v-if="isModelUDing" :class="'w-8 h-8 text-blue-400 brightness-120 blur-sm'" />
         <ArrowsUpDownIcon @click="() => { isModelUDing = !isModelUDing; isModelLRing = false; isModelZooming = false; }"
-          :class="isModelUDing ? 'w-8 h-8 text-blue-800 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
+          :class="isModelUDing ? 'w-8 h-8 text-blue-500 relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
         <NumChange v-if="isModelUDing" v-bind:posTop="206" @minus-event="() => { changeModelUD(false) }"
           @plus-event="() => { changeModelUD(true) }" />
       </li>
       <li class="w-8 h-8" @click="openSettings">
-        <Cog6ToothIcon class="icon-menu" />
+        <Cog6ToothIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
     </ul>
   </div>
