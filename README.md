@@ -1,10 +1,11 @@
-<div style="display: flex; width: 100%; gap: 16px;">
+
+<div align="center" style="display: flex; flex-direction: column; align-items: center;">
 <img style="width: 156px; height: 156px; border-radius: 12px;" src="./public/app-icon.png" alt="App Icon"/></a>
-
-<div align="center" style="height: 156px; display: flex; flex-direction: column; align-items: center;">
-
+<br>
+<br>
 <i>Alive：支持 Live2d 和 MMD 模型的开源桌宠软件。</i>
-
+<br>
+<br>
 <a href="https://github.com/TopSea/Alive/stargazers"><img src="https://img.shields.io/github/stars/TopSea/Alive" alt="Stars Badge"/></a>
 <a href="https://github.com/TopSea/Alive/pulls"><img src="https://img.shields.io/github/issues-pr/TopSea/Alive" alt="Pull Requests Badge"/></a>
 <a href="https://github.com/TopSea/Alive/issues"><img src="https://img.shields.io/github/issues/TopSea/Alive" alt="Issues Badge"/></a>
@@ -12,8 +13,6 @@
 <br>
 <a href="https://github.com/TopSea/Alive/blob/master/LICENSE"><img src="https://img.shields.io/github/license/TopSea/Alive?color=2b9348" alt="License Badge"/></a>
 <a href="https://github.com/TopSea/Alive/releases"><img src="https://img.shields.io/github/downloads/TopSea/Alive/total" alt="Download Badge"/></a>
-
-</div>
 </div>
 
 ## 开发进度
