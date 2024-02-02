@@ -1,11 +1,11 @@
 {
   "version": "v0.0.1",
   "notes": "Alpha version",
-  "pub_date": "2024-02-02T22:00:00Z",
+  "pub_date": "2024-02-02T01:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "Content of app.msi.sig",
-      "url": "https://github.com/username/reponame/releases/download/v1.0.0/app-x64.msi.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWjlYL040Zk9BY2FLd0tJRysxckJNT2piem9CdGxiUzZyRmpqRkY5WVEwY3RMMjBmVVBlS3BOMG9IUncrMlEybkQrMlVFcm4rZjM1ZHdIN0ZtVU9wVjBaR3BzMFlRN0FVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzA2ODMwOTU5CWZpbGU6QWxpdmVfMC4wLjFfeDY0LXNldHVwLm5zaXMuemlwCllKVHBheDF3ZmVzOHFhVWU4ZVJtYlc1akZMdUFoWlJwaEFFTDRuemRsMCtSaVBKYlE2WjhiM2M2RUptdEQ5OGwyK2huRVgvdEFNWEF2eDRyVittTkNRPT0K",
+      "url": "https://github.com/TopSea/Alive/releases/download/v0.0.1-alpha/Alive_0.0.1_x64-setup.nsis.zip"
     }
   }
 }

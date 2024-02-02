@@ -278,7 +278,7 @@ async function setModel(model: string) {
       <ul class="h-20 grid grid-cols-2 grid-rows-2">
         <li class="flex h-full items-center mx-4 space-x-3">
           <CursorArrowRaysIcon :class="[txt,'w-6 h-6']" />
-          <span :class="[txt,'w-44 text-left']">Click Through</span>
+          <span :class="[txt,'w-44 text-left']">{{  $t('hello') }}</span>
           <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sClickThroughe"
             @change="() => { setSettings('click_through', !sClickThroughe) }" />
         </li>
