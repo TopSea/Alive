@@ -5,9 +5,9 @@ import { enable, disable } from "tauri-plugin-autostart-api";
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { Ref, onBeforeMount, ref } from "vue";
 import {
-  CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon, ArrowDownOnSquareStackIcon, InformationCircleIcon
+  CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon, ArrowDownOnSquareStackIcon, InformationCircleIcon, LanguageIcon
 } from '@heroicons/vue/24/outline'
-
+import { useI18n } from 'vue-i18n'
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
 import { checkUpdate } from "@tauri-apps/api/updater";
 import { getVersion, getName } from "@tauri-apps/api/app";
@@ -19,6 +19,7 @@ const aliveVersion = ref(await getVersion());
 const aliveAppName = ref(await getName());
 // const tauriVersion = ref(await getTauriVersion());
 const showUpdate = ref(false);
+const { locale } = useI18n()
 
 const resourceDirPath = await resourceDir();
 const pathAlive = await join(resourceDirPath, 'data', 'sets_alive.json');
@@ -35,6 +36,8 @@ const sClickThroughe = ref(await storeAlive.get("click_through") as boolean)
 const sStayTop = ref(await storeAlive.get("stay_top") as boolean)
 const sAutoStart = ref(await storeAlive.get("auto_start") as boolean)
 const sAutoCheck = ref(await storeAlive.get("auto_check") as boolean)
+const sLanguage = ref(await storeAlive.get("language") as string)
+locale.value = sLanguage.value
 const isMMD = ref(await storeAlive.get("is_mmd") as boolean);
 const sLiveHttps = ref(await storeLive.get("http_models") as string[])
 const sLiveUrl = ref(await storeLive.get("model_url") as string)
@@ -189,6 +192,16 @@ async function setSettings(key: string, val: any) {
       await storeAlive.save();
       break;
     }
+    case "language": {
+      const lang = val.target.value as string
+      
+      sLanguage.value = lang
+      locale.value = lang
+
+      await storeAlive.set(key, lang);
+      await storeAlive.save();
+      break;
+    }
     default: { }
   }
 }
@@ -271,47 +284,54 @@ async function setModel(model: string) {
       <button @click="() => changeTab('MMD')" 
         :class="activeTab === 'MMD' ? [bgActive,txt,'sets-tab'] : [bgInactive,txt,txtLink,'sets-tab']">MMD</button>
       <button @click="() => changeTab('About')" 
-        :class="activeTab === 'About' ? [bgActive,txt,'sets-tab'] : [bgInactive,txt,txtLink,'sets-tab']">About</button>
+        :class="activeTab === 'About' ? [bgActive,txt,'sets-tab'] : [bgInactive,txt,txtLink,'sets-tab']">{{ $t('sets.about') }}</button>
     </div>
 
     <div v-if="activeTab === 'Alive'" :class="activeTab === 'Alive' ? 'sets-content' : ''">
-      <ul class="h-20 grid grid-cols-2 grid-rows-2">
+      <ul class="grid grid-cols-2 grid-rows-3">
         <li class="flex h-full items-center mx-4 space-x-3">
           <CursorArrowRaysIcon :class="[txt,'w-6 h-6']" />
-          <span :class="[txt,'w-44 text-left']">{{  $t('hello') }}</span>
+          <span :class="[txt,'w-44 text-left']">{{ $t('sets.clickThrough') }}</span>
           <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sClickThroughe"
             @change="() => { setSettings('click_through', !sClickThroughe) }" />
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
           <ArrowUpTrayIcon :class="[txt,'w-6 h-6']" />
-          <span :class="[txt,'w-44 text-left']">Stay at top</span>
+          <span :class="[txt,'w-44 text-left']">{{ $t('sets.stayOnTop') }}</span>
           <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sStayTop"
             @change="() => { setSettings('stay_top', !sStayTop) }" />
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
           <RocketLaunchIcon :class="[txt,'w-6 h-6']" />
-          <span :class="[txt,'w-44 text-left']">Start at launch</span>
+          <span :class="[txt,'w-44 text-left']">{{ $t('sets.startAtLaunch') }}</span>
           <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sAutoStart"
             @change="() => { setSettings('auto_start', !sAutoStart) }" />
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
           <ArrowDownOnSquareStackIcon :class="[txt,'w-6 h-6']" />
-          <span :class="[txt,'w-44 text-left']">Auto download update</span>
+          <span :class="[txt,'w-44 text-left']">{{ $t('sets.autoUpdate') }}</span>
           <input type="checkbox" :class="[txtLight,'sets-check']" :checked="sAutoCheck"
             @change="() => { setSettings('auto_check', !sAutoCheck) }" />
+        </li>
+        <li class="flex h-full items-center mx-4 space-x-3">
+          <LanguageIcon :class="[txt,'w-6 h-6']" />
+          <span :class="[txt,'w-44 text-left']">{{ $t('sets.language') }}</span>
+          <select :value="$i18n.locale" :class="[bg,'rounded-lg border-2 border-blue-300 py-2']" @change="(lang) => {setSettings('language', lang)}">
+            <option v-for="lang in $i18n.availableLocales" :key="`locale-${lang}`" :value="lang" :class="[bg,'hover:bg-blue-300']">{{ lang }}</option>
+          </select>
         </li>
       </ul>
     </div>
 
     <div v-else-if="activeTab === 'Live2d'" :class="activeTab === 'Live2d' ? 'sets-content' : ''">
       <SettingModels :txt="txt" :txt-link="txtLink" :bg-active="bgActive" :bg-inactive="bgInactive" 
-      :models-title="'Choose Live2d model: '" :curr-model="currLiveModel" :models="allLiveNames"
+      :models-title="$t('sets.chooseModel',{'model':'Live2d'})" :curr-model="currLiveModel" :models="allLiveNames"
         @refresh-models="refreshModels" @set-model="setModel" @add-model="addingModel = !addingModel" />
     </div>
 
     <div v-else-if="activeTab === 'MMD'" :class="activeTab === 'MMD' ? 'sets-content' : ''">
       <SettingModels :txt="txt" :txt-link="txtLink" :bg-active="bgActive" :bg-inactive="bgInactive" 
-       :models-title="'Choose MMD model: '" :curr-model="currMmdModel"
+       :models-title="$t('sets.chooseModel',{'model':'MMD'})" :curr-model="currMmdModel"
        :models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel"
         @add-model="addingModel = !addingModel" />
 
@@ -333,37 +353,37 @@ async function setModel(model: string) {
         </div>
         <ul class="pl-8 flex flex-col space-y-2">
           <li class="flex">
-            <h3 :class="[txt,'font-bold']">开源项目地址：</h3>
+            <h3 :class="[txt,'font-bold']">{{ $t('sets.openSource') }}</h3>
             <a href="https://github.com/TopSea/Alive" target="_blank" :class="[txt,txtLink]">https://github.com/TopSea/Alive</a>
           </li>
           <li class="flex">
-            <h3 :class="[txt,'font-bold']">关于作者：</h3>
+            <h3 :class="[txt,'font-bold']">{{ $t('sets.aboutAuthor') }}</h3>
             <a href="https://space.bilibili.com/307219768" target="_blank" :class="[txt,txtLink]">https://space.bilibili.com/307219768</a>
           </li>
           <li class="flex">
-            <h3 :class="[txt,'font-bold']">支持项目：</h3>
+            <h3 :class="[txt,'font-bold']">{{ $t('sets.support') }}</h3>
             <a href="https://afdian.net/a/GoAHi" target="_blank" :class="[txt,txtLink]">https://afdian.net/a/GoAHi</a>
           </li>
           <li class="flex">
             <div class="flex">
-              <h3 :class="[txt,'font-bold']">当前版本：</h3>
+              <h3 :class="[txt,'font-bold']">{{ $t('sets.version') }}</h3>
               <p :class="txt">{{ aliveVersion + '-alpha'}}</p>
               <div class=" relative flex group/build-info">
                 <InformationCircleIcon class="w-5 h-5 ml-2 justify-self-end self-center text-orange-300"/>
-                <p class=" invisible group-hover/build-info:visible w-44 absolute left-5 top-5 px-4 py-2 rounded-lg border-2 shadow-md border-orange-300 bg-orange-50">当前为 alpha 版本，运行时很可能会遇到问题！</p>
+                <p class=" invisible group-hover/build-info:visible w-44 absolute left-5 top-5 px-4 py-2 rounded-lg border-2 shadow-md border-orange-300 bg-orange-50">{{ $t('sets.infoAlpha' )}}</p>
               </div>
             </div>
-            <button :class="[txt,txtLink,'ml-8 font-bold']" @click="aliveCheckUpdate">检查更新</button>
+            <button :class="[txt,txtLink,'ml-8 font-bold']" @click="aliveCheckUpdate">{{ $t('sets.checkUpdate') }}</button>
           </li>
         </ul>
       </div>
 
       <div class="grow flex flex-col pt-4 px-8">
-        <h3 class="font-bold text-blue-950">赞助者：</h3>
+        <h3 class="font-bold text-blue-950">{{ $t('sets.sponsor') }}</h3>
         <ul class="pl-8 flex flex-col space-y-2">
           <li class="flex">
             <a href="https://afdian.net/a/GoAHi" target="_blank" :class="[txt,txtLink]">
-              当前没有赞助者，快来占据沙发吧~
+              {{ $t('sets.sponsorEmpty') }}
             </a>
           </li>
         </ul>

@@ -1,0 +1,33 @@
+{
+    "app_name": "Alive",
+    "author": "GoAHi",
+    "sets": {
+        "live2d": "Live2D",
+        "mmd": "MMD",
+        "about": "About",
+        "clickThrough": "Click through",
+        "stayOnTop": "Stay on Top",
+        "startAtLaunch": "Start at Boot",
+        "autoUpdate": "Automatic Updates",
+        "language": "Language",
+        "cn": "简体中文",
+        "en": "English",
+        "mode": "Display Mode",
+        "darkMode": "Dark Mode",
+        "lightMode": "Light Mode",
+        "chooseModel": "Choose {model} Model：",
+        "openSource": "Project：",
+        "aboutAuthor": "Author：",
+        "support": "Support：",
+        "version": "Version：",
+        "infoAlpha": "Currently running an ALPHA version, expect potential issues during operation!",
+        "infoBeta": "Currently running an BETA version, you may encounter problems!",
+        "checkUpdate": "Check for Updates",
+        "sponsor": "Sponsors：",
+        "sponsorEmpty": "There are no sponsors yet, be the first!",
+        "addModelT": "Please enter the model's address：",
+        "submit": "Submit",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+    }
+}

@@ -2,22 +2,17 @@ import { createApp } from "vue";
 import "./styles.css";
 import Settings from "./components/sets/Settings.vue";
 
+import zh_CN from "./components/lang/zh_CN.json"
+import en_US from "./components/lang/en_US.json"
 import { createI18n } from 'vue-i18n';
-const messages = {
-    en: {
-        hello: 'hello world'
-    },
-    cn: {
-        hello: '你好，世界'
-    }
-}
+const localeTxt = { zh_CN, en_US }
 
 const i18n = createI18n({
     legacy: false,
     globalInjection: true,
-    locale: 'cn', // set locale
-    fallbackLocale: 'en', // set fallback locale
-    messages, // set locale messages
+    locale: 'zh_CN', // set locale
+    fallbackLocale: 'en_US', // set fallback locale
+    messages: localeTxt, // set locale messages
 })
 
 createApp(Settings).use(i18n).mount("#settings");
