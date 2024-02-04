@@ -15,6 +15,7 @@
         "mode": "显示模式",
         "darkMode": "深色模式",
         "lightMode": "浅色模式",
+        "followMode": "跟随系统",
         "chooseModel": "选择 {model} 模型：",
         "openSource": "开源项目地址：",
         "aboutAuthor": "关于作者：",

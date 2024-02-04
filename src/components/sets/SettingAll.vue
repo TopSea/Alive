@@ -2,8 +2,8 @@
 import { Store } from "tauri-plugin-store-api";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { enable, disable } from "tauri-plugin-autostart-api";
-import { WebviewWindow } from '@tauri-apps/api/window';
-import { Ref, onBeforeMount, ref } from "vue";
+import { WebviewWindow, appWindow } from '@tauri-apps/api/window';
+import { Ref, onBeforeMount, ref, onUnmounted } from "vue";
 import {
   CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon, ArrowDownOnSquareStackIcon, InformationCircleIcon, LanguageIcon
 } from '@heroicons/vue/24/outline'
@@ -14,17 +14,19 @@ import { useI18n } from 'vue-i18n'
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
 import { checkUpdate } from "@tauri-apps/api/updater";
 import { getVersion, getName } from "@tauri-apps/api/app";
-import { txt,input,txtHover,bg,bgActive,bgInactive,} from "../../theme/color";
-import { changeDisplayMode,} from "../../theme/theme";
+import { txt, input, txtHover, bg, bgActive, bgInactive, } from "../../theme/color";
+import { changeDisplayMode, } from "../../theme/theme";
 
 import AddModelDialog from "./AddModelDialog.vue";
 import SettingModels from "./SettingModels.vue";
+import { UnlistenFn } from "@tauri-apps/api/event";
 
 const aliveVersion = ref(await getVersion());
 const aliveAppName = ref(await getName());
 // const tauriVersion = ref(await getTauriVersion());
 const showUpdate = ref(false);
 const { locale } = useI18n()
+var unlistenSys: UnlistenFn | null = null;
 
 const resourceDirPath = await resourceDir();
 const pathAlive = await join(resourceDirPath, 'data', 'sets_alive.json');
@@ -70,8 +72,17 @@ async function aliveCheckUpdate() {
   showUpdate.value = shouldUpdate;
 }
 
-onBeforeMount(() => {
-  changeDisplayMode(sDisplayMode.value === 'dark')
+onBeforeMount(async () => {
+  if (sDisplayMode.value === "follow") {
+    const currTheme = await appWindow.theme();
+    changeDisplayMode(currTheme === "dark")
+    unlistenSys = await appWindow.onThemeChanged(({ payload: theme }) => {
+      console.log('New theme: ' + theme);
+      changeDisplayMode(theme === "dark")
+    });
+  } else {
+    changeDisplayMode(sDisplayMode.value === "dark")
+  }
   const sCurrLive = sLiveUrl.value
   allLivePaths.value[0] = sCurrLive
   const modelLive = getModelName(sCurrLive)
@@ -195,9 +206,22 @@ async function setSettings(key: string, val: any) {
     case "display_mode": {
       const mode = val.target.value as string
       console.log("mode:", mode);
-      
       sDisplayMode.value = mode
-      changeDisplayMode(mode === "dark")
+
+      if (mode === "follow") {
+        const currTheme = await appWindow.theme();
+        console.log('currTheme: ' + currTheme);
+        changeDisplayMode(currTheme === "dark")
+        unlistenSys = await appWindow.onThemeChanged(({ payload: theme }) => {
+          console.log('New theme: ' + theme);
+          changeDisplayMode(theme === "dark")
+        });
+      } else {
+        if (unlistenSys !== null) {
+          unlistenSys();
+        }
+        changeDisplayMode(mode === "dark")
+      }
       await storeAlive.set(key, mode);
       await storeAlive.save();
       mainWindow?.emit("change_mode", mode);
@@ -273,6 +297,12 @@ async function addModel(modelURL: string) {
   }
 }
 
+onUnmounted(() => {
+  console.log("settings out");
+  if (unlistenSys !== null) {
+    unlistenSys();
+  }
+})
 </script>
 
 <template>
@@ -318,10 +348,11 @@ async function addModel(modelURL: string) {
         <li class="flex h-full items-center mx-4 space-x-3">
           <LanguageIcon :class="[txt, 'w-6 h-6']" />
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.language') }}</span>
-          <select :value="$i18n.locale" :class="[bg,txt, 'rounded-lg border-2 border-blue-300 py-2']"
+          <select :value="$i18n.locale" :class="[bg, txt, 'rounded-lg border-2 border-blue-300 py-2']"
             @change="(lang) => { setSettings('language', lang) }">
-            <option v-for="lang in $i18n.availableLocales" :key="`locale-${lang}`" :value="lang"
-              :class="[bg,txt]">{{ lang }}</option>
+            <option v-for="lang in $i18n.availableLocales" :key="`locale-${lang}`" :value="lang" :class="[bg, txt]">{{
+              lang
+            }}</option>
           </select>
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
@@ -330,9 +361,11 @@ async function addModel(modelURL: string) {
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.mode') }}</span>
           <select :value="sDisplayMode" :class="[bg, txt, 'rounded-lg border-2 border-blue-300 py-2']"
             @change="(mode) => { setSettings('display_mode', mode) }">
-            <option value="dark" :class="[bg,txt]">{{ $t('sets.darkMode') }}
+            <option value="dark" :class="[bg, txt]">{{ $t('sets.darkMode') }}
             </option>
-            <option value="light" :class="[bg,txt]">{{ $t('sets.lightMode') }}
+            <option value="light" :class="[bg, txt]">{{ $t('sets.lightMode') }}
+            </option>
+            <option value="follow" :class="[bg, txt]">{{ $t('sets.followMode') }}
             </option>
           </select>
         </li>
@@ -340,13 +373,15 @@ async function addModel(modelURL: string) {
     </div>
 
     <div v-else-if="activeTab === 'Live2d'" :class="activeTab === 'Live2d' ? 'sets-content' : ''">
-      <SettingModels :models-title="$t('sets.chooseModel', { 'model': 'Live2d' })" :curr-model="currLiveModel" :models="allLiveNames"
-        @refresh-models="refreshModels" @set-model="setModel" @add-model="addingModel = !addingModel" />
+      <SettingModels :models-title="$t('sets.chooseModel', { 'model': 'Live2d' })" :curr-model="currLiveModel"
+        :models="allLiveNames" @refresh-models="refreshModels" @set-model="setModel"
+        @add-model="addingModel = !addingModel" />
     </div>
 
     <div v-else-if="activeTab === 'MMD'" :class="activeTab === 'MMD' ? 'sets-content' : ''">
-      <SettingModels :models-title="$t('sets.chooseModel', { 'model': 'MMD' })" :curr-model="currMmdModel" :models="allMmdNames"
-        @refresh-models="refreshModels" @set-model="setModel" @add-model="addingModel = !addingModel" />
+      <SettingModels :models-title="$t('sets.chooseModel', { 'model': 'MMD' })" :curr-model="currMmdModel"
+        :models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel"
+        @add-model="addingModel = !addingModel" />
 
       <!-- <div id="add_model_dialog" v-show="addingModel" class=" absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-200 z-10 py-4 px-6 
      rounded-xl border-[3px] border-slate-600 shadow-xl space-y-2">

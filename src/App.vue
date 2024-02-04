@@ -2,15 +2,16 @@
 import { onBeforeMount, onMounted, ref } from "vue";
 import Live2d from "./components/live2d/Live2d.vue";
 import MMD from "./components/mmd/MMD.vue"
-import { listen } from "@tauri-apps/api/event";
+import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
-import { WebviewWindow } from "@tauri-apps/api/window";
-import { changeDisplayMode,} from "./theme/theme";
+import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
+import { changeDisplayMode, } from "./theme/theme";
 
 var settingsOpened = false
 const isMMD = ref()
 const autoCheck = ref()
+var unlistenSys: UnlistenFn | null = null;
 
 async function getIsMMD() {
   const resourceDirPath = await resourceDir();
@@ -20,7 +21,16 @@ async function getIsMMD() {
   isMMD.value = await store.get("is_mmd") as boolean
   autoCheck.value = await store.get("auto_check") as boolean
   const sDisplayMode = await store.get("display_mode") as string
-  changeDisplayMode(sDisplayMode === "dark")
+  if (sDisplayMode === "follow") {
+    const currTheme = await appWindow.theme();
+    changeDisplayMode(currTheme === "dark")
+    unlistenSys = await appWindow.onThemeChanged(({ payload: theme }) => {
+      console.log('New theme: ' + theme);
+      changeDisplayMode(theme === "dark")
+    });
+  } else {
+    changeDisplayMode(sDisplayMode === "dark")
+  }
 }
 async function listenEvents() {
   await listen('event_is_mmd', (event: any) => {
@@ -28,9 +38,22 @@ async function listenEvents() {
     isMMD.value = event.payload as boolean
     location.reload()
   });
-  await listen('change_mode', (event: any) => {
+  await listen('change_mode', async (event: any) => {
     const mode = event.payload as string
-    changeDisplayMode(mode === "dark")
+    if (mode === "follow") {
+      const currTheme = await appWindow.theme();
+      console.log('currTheme: ' + currTheme);
+      changeDisplayMode(currTheme === "dark")
+      unlistenSys = await appWindow.onThemeChanged(({ payload: theme }) => {
+        console.log('New theme: ' + theme);
+        changeDisplayMode(theme === "dark")
+      });
+    } else {
+      if (unlistenSys !== null) {
+        unlistenSys();
+      }
+      changeDisplayMode(mode === "dark")
+    }
   });
   await listen('event_open_settings', (_event: any) => {
     openSettings()
@@ -80,9 +103,9 @@ onMounted(() => {
 <template>
   <Suspense>
     <Live2d v-if="!isMMD" />
-    <MMD v-else/>
+    <MMD v-else />
 
-    <template #fallback >
+    <template #fallback>
       <div>
         Loading ...
       </div>
