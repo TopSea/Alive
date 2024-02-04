@@ -16,12 +16,12 @@
         @apply form-checkbox rounded w-4 h-4 outline-none focus:outline-dashed
     }
     .sets-item {
-        @apply flex flex-row items-center bg-gradient-to-r from-gray-300 border-2 rounded-xl mx-4 hover:mx-2 border-gray-300
+        @apply flex flex-row items-center bg-gradient-to-r from-alive-inactive border-2 rounded-xl mx-4 hover:mx-2 border-alive-inactive dark:from-alive-inactived dark:to-gray-400
     }
     .sets-item-selected {
-        @apply flex flex-row items-center bg-gradient-to-r from-blue-300 border-2 rounded-xl mx-4 hover:mx-2 border-blue-300
+        @apply flex flex-row items-center bg-gradient-to-r from-alive-active border-2 rounded-xl mx-4 hover:mx-2 border-alive-active dark:from-alive-actived dark:to-gray-400
     }
     .sets-content {
-        @apply flex flex-col grow mb-1 mx-1 rounded-b-lg border-2 border-blue-300
+        @apply flex flex-col grow mb-1 mx-1 rounded-b-lg border-2 border-alive-input dark:border-alive-inputd
     }
 }

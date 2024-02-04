@@ -2,12 +2,9 @@
 import {
   PlusIcon, ArrowPathIcon
 } from '@heroicons/vue/24/solid'
+import { txt, txtHover, border} from "../../theme/color";
 
 const props = defineProps({
-  txt: String,
-  txtLink: String,
-  bgActive: String,
-  bgInactive: String,
   modelsTitle: String,
   currModel: String,
   models: Array<String>,
@@ -23,10 +20,10 @@ const isMMD = props.modelsTitle?.indexOf("MMD") !== -1
 
     <div class=" flex space-x-2 mx-3">
       <button class="flex" @click="$emit('addModel')">
-        <PlusIcon :class="[txt,txtLink,'stroke-2 w-6 h-6']" />
+        <PlusIcon :class="[txt,txtHover,'stroke-2 w-6 h-6']" />
       </button>
       <button class="flex" @click="$emit('refreshModels', isMMD)">
-        <ArrowPathIcon :class="[txt,txtLink,'stroke-2 w-6 h-6']" />
+        <ArrowPathIcon :class="[txt,txtHover,'stroke-2 w-6 h-6']" />
       </button>
     </div>
   </div>
@@ -35,8 +32,8 @@ const isMMD = props.modelsTitle?.indexOf("MMD") !== -1
     <div v-for="model in models" :class="currModel === model ? 'sets-item-selected' : 'sets-item'"
       @click="$emit('setModel', model)">
 
-      <h2 :class="currModel === model ? [txt,'w-4/5 px-2 py-2 rounded-l-md'] :
-        [txt,txtLink,'w-4/5 px-2 py-2 rounded-l-md']">{{ model }}</h2>
+      <h2 :class="currModel === model ? [txt,border,'w-4/5 px-2 py-2 rounded-l-md'] :
+        [txt,border,txtHover,'w-4/5 px-2 py-2 rounded-l-md']">{{ model }}</h2>
     </div>
   </div>
 </template>

@@ -23,8 +23,8 @@ const sVolume = ref(await store.get("volume") as number)
 const sMmdCamera = ref(await store.get("is_mmd_camera") as boolean)
 const sPaused = ref(await store.get("is_paused") as boolean)
 
-const txt = ref("text-gray-950")
-const txtHover = ref("hover:text-blue-950")
+const txt = ref("text-alive-txt dark:text-alive-txtd")
+const txtHover = ref("hover:text-alive-txth dark:hover:text-alive-txthd")
 
 const isVolumeChanging = ref(false)
 const dancing = ref(false)
@@ -33,7 +33,6 @@ const mmd_canvas = ref();
 function reloadPage() {
   location.reload()
 }
-
 
 async function listenEvents() {
   console.log("listenEvents");
@@ -117,7 +116,7 @@ onMounted(() => {
   <div class="w-full h-full static group/menu-mmd">
     <canvas ref="mmd_canvas" class="w-full h-full group-hover/menu-mmd:border-2 border-dashed border-gray-100"></canvas>
     <ul data-tauri-drag-region
-      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-[#93C5FD]/30">
+      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-alive-bg/30 dark:bg-alive-bgd/80">
       <li class="w-8 h-8" @click="reloadPage">
         <ArrowPathIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
@@ -126,11 +125,12 @@ onMounted(() => {
       </li>
       
       <li class="w-8 h-8">
-        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="'w-8 h-8 text-blue-400 blur-sm'" />
-        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="'w-8 h-8 text-blue-400 blur-sm'" />
-        <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }" :class="isVolumeChanging ? 'w-8 h-8 text-blue-500 relative -top-8 ' : ' w-8 h-8 text-gray-950 hover:text-blue-950'" />
+        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="['text-alive-txthd w-8 h-8 blur-sm']" />
+        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="['text-alive-txthd w-8 h-8 blur-sm']" />
+        <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }" 
+          :class="isVolumeChanging ? [txtHover,'text-alive-txth dark:text-alive-txthd w-8 h-8 relative -top-8 ']:[txt,txtHover,'w-8 h-8']" />
         <SpeakerXMarkIcon v-else @click="() => { isVolumeChanging = !isVolumeChanging }"
-          :class="isVolumeChanging ? 'w-8 h-8 text-blue-400 relative -top-8 ' : ' w-8 h-8 text-zinc-700 hover:text-zinc-500'" />
+          :class="isVolumeChanging ? [txtHover,'text-alive-txth dark:text-alive-txthd w-8 h-8 relative -top-8 ']:[txt,txtHover,'w-8 h-8']" />
         <NumChange v-if="isVolumeChanging" :posTop="112" @minus-event="() => { changeModelVoice(false) }"
           @plus-event="() => { changeModelVoice(true) }" />
       </li>

@@ -6,6 +6,7 @@ import { listen } from "@tauri-apps/api/event";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import { WebviewWindow } from "@tauri-apps/api/window";
+import { changeDisplayMode,} from "./theme/theme";
 
 var settingsOpened = false
 const isMMD = ref()
@@ -18,12 +19,18 @@ async function getIsMMD() {
   const store = new Store(path);
   isMMD.value = await store.get("is_mmd") as boolean
   autoCheck.value = await store.get("auto_check") as boolean
+  const sDisplayMode = await store.get("display_mode") as string
+  changeDisplayMode(sDisplayMode === "dark")
 }
 async function listenEvents() {
   await listen('event_is_mmd', (event: any) => {
     console.log("event_is_mmd: ", event.payload as boolean);
     isMMD.value = event.payload as boolean
     location.reload()
+  });
+  await listen('change_mode', (event: any) => {
+    const mode = event.payload as string
+    changeDisplayMode(mode === "dark")
   });
   await listen('event_open_settings', (_event: any) => {
     openSettings()
@@ -61,6 +68,7 @@ function openSettings() {
 
 onBeforeMount(() => {
   getIsMMD()
+  // document.documentElement.classList.add('dark')
 })
 
 onMounted(() => {

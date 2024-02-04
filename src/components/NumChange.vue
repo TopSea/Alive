@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import {
     PlusIcon, MinusIcon
 } from '@heroicons/vue/24/solid'
+import { txt, border} from "../theme/color";
 
 defineProps({ stireKey: String, posTop: Number })
 const emit = defineEmits(['plus-event', 'minus-event'])
@@ -59,17 +60,17 @@ const click = (isPlus: boolean) => {
 
 <template>
     <div class=" absolute flex h-8 items-center rotate-90 space-x-2" :style="{ top: posTop + 'px', left: -48 + 'px' }">
-        <button class="flex items-center w-7 h-7 border-2 border-slate-700 drop-shadow-md rounded-md hover:rounded-2xl "
+        <button :class="[border,'flex items-center w-7 h-7 border-2 drop-shadow-md rounded-md hover:rounded-2xl']"
          @mousedown="onMouseDown(true)"
          @mouseup="onMouseUp(true)"
          >
-            <PlusIcon class="w-7 h-7 border-slate-700" />
+            <PlusIcon :class="[txt,'w-7 h-7']" />
         </button>
-        <button class="flex items-center w-7 h-7 border-2 border-slate-700 drop-shadow-md rounded-md hover:rounded-2xl"
+        <button :class="[border,'flex items-center w-7 h-7 border-2 drop-shadow-md rounded-md hover:rounded-2xl']"
          @mousedown="onMouseDown(false)"
          @mouseup="onMouseUp(false)"
          >
-            <MinusIcon class="w-7 h-7 border-slate-700 rotate-90" />
+            <MinusIcon :class="[txt,'w-7 h-7 rotate-90']" />
         </button>
     </div>
 </template>
