@@ -30,5 +30,15 @@
         "submit": "Submit",
         "confirm": "Confirm",
         "cancel": "Cancel"
+    },
+    "updater": {
+        "info": "Alive, by GoAHi",
+        "title": "Alive Updater",
+        "version": "Update version：",
+        "date": "Release date：",
+        "content": "Update content：",
+        "downloading": "downloading......",
+        "confirm": "Upgrade",
+        "cancel": "Cancel"
     }
 }

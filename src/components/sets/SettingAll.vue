@@ -12,7 +12,6 @@ import {
 } from '@heroicons/vue/24/solid'
 import { useI18n } from 'vue-i18n'
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
-import { checkUpdate } from "@tauri-apps/api/updater";
 import { getVersion, getName } from "@tauri-apps/api/app";
 import { txt, input, txtHover, bg, bgActive, bgInactive, } from "../../theme/color";
 import { changeDisplayMode, } from "../../theme/theme";
@@ -20,11 +19,11 @@ import { changeDisplayMode, } from "../../theme/theme";
 import AddModelDialog from "./AddModelDialog.vue";
 import SettingModels from "./SettingModels.vue";
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { checkAliveUpdate } from "../updater/updater";
 
 const aliveVersion = ref(await getVersion());
 const aliveAppName = ref(await getName());
 // const tauriVersion = ref(await getTauriVersion());
-const showUpdate = ref(false);
 const { locale } = useI18n()
 var unlistenSys: UnlistenFn | null = null;
 
@@ -64,12 +63,6 @@ const activeTab = ref(isMMD ? 'MMD' : 'Live2d')
 
 function changeTab(tab: string) {
   activeTab.value = tab
-}
-
-async function aliveCheckUpdate() {
-  console.log("checking update...");
-  const { shouldUpdate } = await checkUpdate();
-  showUpdate.value = shouldUpdate;
 }
 
 onBeforeMount(async () => {
@@ -192,7 +185,11 @@ async function setSettings(key: string, val: any) {
       break;
     }
     case "auto_check": {
-
+      const check = val as boolean
+      sAutoCheck.value = check
+      if (check) {
+        checkAliveUpdate(check)
+      }
       break;
     }
     case "language": {
@@ -382,15 +379,6 @@ onUnmounted(() => {
       <SettingModels :models-title="$t('sets.chooseModel', { 'model': 'MMD' })" :curr-model="currMmdModel"
         :models="allMmdNames" @refresh-models="refreshModels" @set-model="setModel"
         @add-model="addingModel = !addingModel" />
-
-      <!-- <div id="add_model_dialog" v-show="addingModel" class=" absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-200 z-10 py-4 px-6 
-     rounded-xl border-[3px] border-slate-600 shadow-xl space-y-2">
-      <h2 class="text-md pb-3 font-bold">Url path of your live2d model: </h2>
-      <div class=" flex items-center space-x-2">
-      <input type="text" class=" h-8 w-96 bg-slate-200 rounded-md border-2 border-slate-500" />
-      <button class="font-bold hover:text-blue-400">submit</button>
-      </div>
-    </div> -->
     </div>
 
     <div v-else="activeTab === 'About'" :class="activeTab === 'About' ? 'sets-content' : ''">
@@ -427,7 +415,7 @@ onUnmounted(() => {
                   {{ $t('sets.infoAlpha') }}</p>
               </div>
             </div>
-            <button :class="[txt, txtHover, 'ml-8 font-bold']" @click="aliveCheckUpdate">{{ $t('sets.checkUpdate')
+            <button :class="[txt, txtHover, 'ml-8 font-bold']" @click="() => { checkAliveUpdate(true) }">{{ $t('sets.checkUpdate')
             }}</button>
           </li>
         </ul>

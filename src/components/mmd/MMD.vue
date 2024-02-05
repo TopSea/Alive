@@ -116,7 +116,7 @@ onMounted(() => {
   <div class="w-full h-full static group/menu-mmd">
     <canvas ref="mmd_canvas" class="w-full h-full group-hover/menu-mmd:border-2 border-dashed border-gray-100"></canvas>
     <ul data-tauri-drag-region
-      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-alive-bg/30 dark:bg-alive-bgd/80">
+      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-alive-active/30 dark:bg-alive-actived/30">
       <li class="w-8 h-8" @click="reloadPage">
         <ArrowPathIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>

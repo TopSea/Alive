@@ -30,5 +30,15 @@
         "submit": "提交",
         "confirm": "确认",
         "cancel": "取消"
+    },
+    "updater": {
+        "info": "晓，by GoAHi",
+        "title": "晓更新器",
+        "version": "版本更新：",
+        "date": "发布日期：",
+        "content": "更新内容：",
+        "downloading": "下载中......",
+        "confirm": "升级",
+        "cancel": "取消"
     }
 }

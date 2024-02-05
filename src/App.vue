@@ -7,13 +7,16 @@ import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
 import { changeDisplayMode, } from "./theme/theme";
+import { onUnmounted } from "vue";
+import { checkAliveUpdate } from "./components/updater/updater";
 
 var settingsOpened = false
 const isMMD = ref()
 const autoCheck = ref()
 var unlistenSys: UnlistenFn | null = null;
+var unlistenUpdate: UnlistenFn | null = null;
 
-async function getIsMMD() {
+async function initSettings() {
   const resourceDirPath = await resourceDir();
   const path = await join(resourceDirPath, 'data', 'sets_alive.json');
   console.log("path: ", path);
@@ -21,6 +24,9 @@ async function getIsMMD() {
   isMMD.value = await store.get("is_mmd") as boolean
   autoCheck.value = await store.get("auto_check") as boolean
   const sDisplayMode = await store.get("display_mode") as string
+
+  checkAliveUpdate(autoCheck.value)
+
   if (sDisplayMode === "follow") {
     const currTheme = await appWindow.theme();
     changeDisplayMode(currTheme === "dark")
@@ -90,13 +96,20 @@ function openSettings() {
 }
 
 onBeforeMount(() => {
-  getIsMMD()
-  // document.documentElement.classList.add('dark')
+  initSettings()
 })
 
 onMounted(() => {
   console.log("App onMounted");
   listenEvents()
+})
+onUnmounted(() => {
+  if (unlistenSys !== null) {
+    unlistenSys();
+  }
+  if (unlistenUpdate !== null) {
+    unlistenUpdate();
+  }
 })
 </script>
 

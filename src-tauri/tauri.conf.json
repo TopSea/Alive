@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Alive",
-    "version": "0.0.1"
+    "version": "0.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -77,9 +77,9 @@
         "https://gitee.com/topsea/alive-release/raw/master/alive_latest.json",
         "https://raw.githubusercontent.com/TopSea/Alive/main/docs/alive_latest.json"
       ],
-      "dialog": true,
+      "dialog": false,
       "windows": {
-        "installMode": "passive"
+        "installMode": "basicUi"
       },
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDcxODBGM0UxQ0Q3RkY1MTkKUldRWjlYL040Zk9BY2NrU3VsU3JVcHo4QVBoRDFWM2NvcnM4NFgzU1NybTUxTUNHb3ZVQnp0VE4K"
     }
