@@ -50,7 +50,7 @@ function openUpdater() {
 }
 
 export async function checkAliveUpdate(open: boolean) {
-    console.error("checkAliveUpdate");
+    console.log("checkAliveUpdate");
     try {
         const { shouldUpdate } = await checkUpdate();
         if (shouldUpdate && open) {

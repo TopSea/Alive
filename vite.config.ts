@@ -23,7 +23,8 @@ export default defineConfig(async () => ({
     rollupOptions: {
       input: {
           index: 'index.html',
-          settings: 'settings.html',
+          settings: 'pages/settings.html',
+          updater: 'pages/updater.html',
       }
     },
   }

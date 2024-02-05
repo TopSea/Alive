@@ -54,7 +54,7 @@
       }
     },
     "security": {
-      "csp": "default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content: file: https://asset.localhost; img-src * data: blob:; asset: https://asset.localhost; connect-src * blob:;"
+      "csp": "default-src * 'self' 'unsafe-inline' 'unsafe-eval' data: gap: content: file: https://asset.localhost; img-src * data: blob:; asset: https://asset.localhost; connect-src * blob:; script-src 'unsafe-eval';"
     },
     "windows": [
       {

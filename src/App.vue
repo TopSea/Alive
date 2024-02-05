@@ -74,7 +74,7 @@ function openSettings() {
     settingsWindow?.setFocus();
   } else {
     const settingsWindow = new WebviewWindow('tauri_win_settings', {
-      url: 'settings.html',
+      url: '/pages/settings.html',
       x: 64,
       y: 64,
       width: 640,

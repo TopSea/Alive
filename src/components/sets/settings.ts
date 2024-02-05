@@ -1,9 +1,9 @@
 import { createApp } from "vue";
-import "./styles.css";
-import Settings from "./components/sets/Settings.vue";
+import "../../styles.css";
+import Settings from "./Settings.vue";
 
-import zh_CN from "./components/lang/zh_CN.json"
-import en_US from "./components/lang/en_US.json"
+import zh_CN from "../lang/zh_CN.json"
+import en_US from "../lang/en_US.json"
 import { createI18n } from 'vue-i18n';
 const localeTxt = { zh_CN, en_US }
 
