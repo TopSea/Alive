@@ -317,7 +317,7 @@ onUnmounted(() => {
     </div>
 
     <div v-if="activeTab === 'Alive'" :class="activeTab === 'Alive' ? 'sets-content' : ''">
-      <ul class="grid grid-cols-2 grid-rows-3">
+      <ul class=" h-64 grid grid-cols-2 grid-rows-3">
         <li class="flex h-full items-center mx-4 space-x-3">
           <CursorArrowRaysIcon :class="[txt, 'w-6 h-6']" />
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.clickThrough') }}</span>
@@ -325,13 +325,13 @@ onUnmounted(() => {
             @change="() => { setSettings('click_through', !sClickThroughe) }" />
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
-          <ArrowUpTrayIcon :class="[txt, 'w-6 h-6']" />
+          <ArrowUpTrayIcon :class="[txt, 'w-5 h-5']" />
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.stayOnTop') }}</span>
           <input type="checkbox" :class="[input, 'sets-check']" :checked="sStayTop"
             @change="() => { setSettings('stay_top', !sStayTop) }" />
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
-          <RocketLaunchIcon :class="[txt, 'w-6 h-6']" />
+          <RocketLaunchIcon :class="[txt, 'w-5 h-5']" />
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.startAtLaunch') }}</span>
           <input type="checkbox" :class="[input, 'sets-check']" :checked="sAutoStart"
             @change="() => { setSettings('auto_start', !sAutoStart) }" />
@@ -343,7 +343,7 @@ onUnmounted(() => {
             @change="() => { setSettings('auto_check', !sAutoCheck) }" />
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
-          <LanguageIcon :class="[txt, 'w-6 h-6']" />
+          <LanguageIcon :class="[txt, 'w-7 h-7']" />
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.language') }}</span>
           <select :value="$i18n.locale" :class="[bg, txt, 'rounded-lg border-2 border-blue-300 py-2']"
             @change="(lang) => { setSettings('language', lang) }">
@@ -353,8 +353,8 @@ onUnmounted(() => {
           </select>
         </li>
         <li class="flex h-full items-center mx-4 space-x-3">
-          <MoonIcon :class="[txt, 'w-6 h-6']" v-if="sDisplayMode === 'dark'" />
-          <SunIcon :class="[txt, 'w-6 h-6']" v-else />
+          <MoonIcon :class="[txt, 'w-7 h-7']" v-if="sDisplayMode === 'dark'" />
+          <SunIcon :class="[txt, 'w-7 h-7']" v-else />
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.mode') }}</span>
           <select :value="sDisplayMode" :class="[bg, txt, 'rounded-lg border-2 border-blue-300 py-2']"
             @change="(mode) => { setSettings('display_mode', mode) }">
@@ -386,7 +386,7 @@ onUnmounted(() => {
         <div class=" relative h-32 w-32 rounded-lg shadow-md bg-slate-400 group/app-icon hover:shadow-blue-300">
           <img class="object-cover h-32 w-32 rounded-lg" src="/app-icon.png" alt="" />
           <p
-            class="w-full invisible group-hover/app-icon:visible absolute bottom-0 italic bg-gray-300 text-blue-300 justify-self-center">
+            class="w-full invisible group-hover/app-icon:visible absolute bottom-0 rounded-b-lg italic bg-gray-300 text-blue-300 justify-self-center">
             {{ aliveAppName + ', by TopSea' }}</p>
         </div>
         <ul class="pl-8 flex flex-col space-y-2">
