@@ -12,8 +12,8 @@ import {
 } from '@heroicons/vue/24/solid'
 import { useI18n } from 'vue-i18n'
 import { FileEntry, readDir } from "@tauri-apps/api/fs";
-import { getVersion, getName } from "@tauri-apps/api/app";
-import { txt, input, txtHover, bg, bgActive, bgInactive, } from "../../theme/color";
+import { getName } from "@tauri-apps/api/app";
+import { txt, input, txtHover, bg, bgActive, bgInactive, alphaIcon, alphaTxt, betaIcon, betaTxt, } from "../../theme/color";
 import { changeDisplayMode, } from "../../theme/theme";
 
 import AddModelDialog from "./AddModelDialog.vue";
@@ -21,7 +21,7 @@ import SettingModels from "./SettingModels.vue";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { checkAliveUpdate } from "../updater/updater";
 
-const aliveVersion = ref(await getVersion());
+const aliveVersion = '0.0.1-beta';
 const aliveAppName = ref(await getName());
 // const tauriVersion = ref(await getTauriVersion());
 const { locale } = useI18n()
@@ -317,7 +317,7 @@ onUnmounted(() => {
     </div>
 
     <div v-if="activeTab === 'Alive'" :class="activeTab === 'Alive' ? 'sets-content' : ''">
-      <ul class=" h-64 grid grid-cols-2 grid-rows-3">
+      <ul class=" h-40 grid grid-cols-2 grid-rows-3">
         <li class="flex h-full items-center mx-4 space-x-3">
           <CursorArrowRaysIcon :class="[txt, 'w-6 h-6']" />
           <span :class="[txt, 'w-44 text-left']">{{ $t('sets.clickThrough') }}</span>
@@ -407,12 +407,11 @@ onUnmounted(() => {
           <li class="flex">
             <div class="flex">
               <h3 :class="[txt, 'font-bold']">{{ $t('sets.version') }}</h3>
-              <p :class="txt">{{ aliveVersion + '-alpha' }}</p>
-              <div class=" relative flex group/build-info">
-                <InformationCircleIcon class="w-5 h-5 ml-2 justify-self-end self-center text-orange-300" />
-                <p
-                  class=" invisible group-hover/build-info:visible w-44 absolute left-5 top-5 px-4 py-2 rounded-lg border-2 shadow-md border-orange-300 bg-orange-50">
-                  {{ $t('sets.infoAlpha') }}</p>
+              <p :class="txt">{{ aliveVersion }}</p>
+              <div class=" relative flex group/build-info" v-if="aliveVersion.endsWith('-alpha')||aliveVersion.endsWith('-beta')">
+                <InformationCircleIcon :class="aliveVersion.endsWith('-alpha')?alphaIcon:betaIcon" />
+                <p :class="aliveVersion.endsWith('-alpha')?alphaTxt:betaTxt">
+                  {{ aliveVersion.endsWith('-alpha')?$t('sets.infoAlpha'):$t('sets.infoBeta') }}</p>
               </div>
             </div>
             <button :class="[txt, txtHover, 'ml-8 font-bold']" @click="() => { checkAliveUpdate(true) }">{{ $t('sets.checkUpdate')

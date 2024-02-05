@@ -22,7 +22,7 @@
         "support": "支持项目：",
         "version": "当前版本：",
         "infoAlpha": "当前为 alpha 版本，运行时很可能会遇到问题！",
-        "infoBeta": "当前为 infoBeta 版本，运行时可能会遇到问题！",
+        "infoBeta": "当前为 beta 版本，运行时可能会遇到问题！",
         "checkUpdate": "检查更新",
         "sponsor": "赞助者：",
         "sponsorEmpty": "当前没有赞助者，快来占据沙发吧~",

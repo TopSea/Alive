@@ -16,6 +16,8 @@ export default {
           active: '#7dd3fc',
           inactive: '#cbd5e1',
           bg: '#f0f9ff',
+          alpha:'#fdba74',
+          beta:'#94a3b8',
 
           // 深色模式
           txtd: '#e0f2fe',
@@ -24,6 +26,8 @@ export default {
           actived: '#2563eb',
           inactived: '#64748b',
           bgd: '#0f172a',
+          alpha:'#fdba74',
+          beta:'#94a3b8',
         },
       }
     },

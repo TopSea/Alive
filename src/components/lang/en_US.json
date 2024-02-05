@@ -15,7 +15,7 @@
         "mode": "Display Mode",
         "darkMode": "Dark Mode",
         "lightMode": "Light Mode",
-        "followMode": "Follow System",
+        "followMode": "System",
         "chooseModel": "Choose {model} Model：",
         "openSource": "Project：",
         "aboutAuthor": "Author：",
