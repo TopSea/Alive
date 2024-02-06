@@ -1,11 +1,11 @@
 {
-  "version": "v0.0.1",
-  "notes": "Alpha version",
-  "pub_date": "2024-02-02T01:00:00Z",
+  "version": "v0.0.2",
+  "notes": "自动检查更新功能；多语言切换功能；深色模式切换功能",
+  "pub_date": "2024-02-06T18:00:00Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWjlYL040Zk9BY2FLd0tJRysxckJNT2piem9CdGxiUzZyRmpqRkY5WVEwY3RMMjBmVVBlS3BOMG9IUncrMlEybkQrMlVFcm4rZjM1ZHdIN0ZtVU9wVjBaR3BzMFlRN0FVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzA2ODMwOTU5CWZpbGU6QWxpdmVfMC4wLjFfeDY0LXNldHVwLm5zaXMuemlwCllKVHBheDF3ZmVzOHFhVWU4ZVJtYlc1akZMdUFoWlJwaEFFTDRuemRsMCtSaVBKYlE2WjhiM2M2RUptdEQ5OGwyK2huRVgvdEFNWEF2eDRyVittTkNRPT0K",
-      "url": "https://github.com/TopSea/Alive/releases/download/v0.0.1-alpha/Alive_0.0.1_x64-setup.nsis.zip"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWjlYL040Zk9BY1hGR1Flc0ZCd09RU0llUU9pa01TVDlyYVovRGtLZzMzNlBpYUNwOHFkaDlLVkxiRGRFT0phUHE1aUpkcE51WTFlZjdnODJiYUhGZE9BTFhpeWdzK3dnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzA3MTM1Njk5CWZpbGU6QWxpdmVfMC4wLjJfeDY0LXNldHVwLm5zaXMuemlwCkxBKzlnS1gvUi9pNTZMYTliME5IVHlhKzdGVjJQcThiYURjY2pDaFBjb0FpSzVSNDh4MW1SdXBHZGw1RTh5OVN0K0hjL0hWUUdha3kxcUU2K1Fqc0J3PT0K",
+      "url": "https://github.com/TopSea/Alive/releases/download/v0.0.1-beta/Alive_0.0.2_x64-setup.nsis.zip"
     }
   }
 }
