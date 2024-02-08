@@ -18,18 +18,21 @@
         {
             "motion_name": "dance1",
             "motions": [
-                "../motion/丘丘摇/丘丘摇.vmd",
-                "../motion/丘丘摇/丘丘摇-相机.vmd"
+                "../motion/奶刀/人物动作_物理.vmd",
+                "../motion/奶刀/镜头_by_Lct火红枣.vmd"
             ],
-            "bgm": "",
+            "bgm": "../motion/奶刀/奶刀.wav",
             "extra": {
-                "e_model": "",
-                "e_motions": []
+                "e_model": "../background/磐岩结绿/磐岩结绿_形态1.pmx",
+                "e_motions": ["../motion/奶刀/奶刀.vmd"]
             }
         }
     ],
     "pose_motions": [
-        "pose2"
+        "pose2",
+        "dance1",
+        "dance1",
+        "dance1"
     ],
     "dance_motions": [
         "dance1"
