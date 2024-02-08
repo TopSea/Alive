@@ -235,8 +235,42 @@ export class SceneBuilder implements ISceneBuilder {
         })
 
         const currMotion = this.randomAnimation(sets.pose_motions);
+        mmdCamera.setAnimation(currMotion);
 
-        // 加载 extra
+        modelMesh.parent = mmdRoot;
+        // 添加阴影
+        for (const mesh of modelMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
+        modelMesh.receiveShadows = true;
+
+        const mmdModel = mmdRuntime.createMmdModel(modelMesh);
+        mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
+            mmdModel.addAnimation(mmdAnimation);
+        })
+
+        mmdModel.setAnimation(currMotion);
+        this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
+
+        // 加载设置。
+        if (this._options.paused) {
+            mmdRuntime.pauseAnimation();
+        } else {
+            mmdRuntime.playAnimation();
+        }
+        if (this._options.volume) {
+            if (!audioPlayer.muted) {
+                audioPlayer.mute();
+            }
+        } else {
+            audioPlayer.unmute();
+        }
+        if (this._options.mmdCamera) {
+            scene.activeCamera = mmdCamera;
+        } else {
+            scene.activeCamera = camera;
+        }
+        
+
+        // 加载 extra 和背景音乐
         const loadExtras = async (motionName: string) => {
             const alive = aliveMotions.find((aliveMotion) => motionName === aliveMotion.motion_name);
             const extraMotions: any[] =  alive.extra.e_motions;
@@ -279,41 +313,8 @@ export class SceneBuilder implements ISceneBuilder {
         }
         loadExtras(currMotion);
 
-        mmdCamera.setAnimation(currMotion);
-        // 加载设置。
-        if (this._options.paused) {
-            mmdRuntime.pauseAnimation();
-        } else {
-            mmdRuntime.playAnimation();
-        }
-        if (this._options.volume) {
-            if (!audioPlayer.muted) {
-                audioPlayer.mute();
-            }
-        } else {
-            audioPlayer.unmute();
-        }
-        if (this._options.mmdCamera) {
-            scene.activeCamera = mmdCamera;
-        } else {
-            scene.activeCamera = camera;
-        }
-
-        modelMesh.parent = mmdRoot;
-        // 添加阴影
-        for (const mesh of modelMesh.metadata.meshes) shadowGenerator.addShadowCaster(mesh);
-        modelMesh.receiveShadows = true;
-
-        const mmdModel = mmdRuntime.createMmdModel(modelMesh);
-        mmdAnimations.forEach((mmdAnimation: MmdAnimation) => {
-            mmdModel.addAnimation(mmdAnimation);
-        })
-
-        mmdModel.setAnimation(currMotion);
-        this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
-
-        // 动作循环
-        const animteLoop: InAnimationLoop = async (mmdDancing) => {
+        // 回到默认状态
+        const toDefault = () => {
             audioPlayer.currentTime = 0;
             
             // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
@@ -329,6 +330,11 @@ export class SceneBuilder implements ISceneBuilder {
                 extraModel.mesh.dispose();
                 this._aliveExtra = null;
             }
+        }
+
+        // 动作循环
+        const animteLoop: InAnimationLoop = async (mmdDancing) => {
+            toDefault();
             
             const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.pose_motions);
             // 加载下个场景中的 extra
