@@ -22,5 +22,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-src-tauri/live2d/aisaikesi_4/*
-src-tauri/live2d/abeikelongbi_3/*
+src-tauri/live2d/*
+src-tauri/mmd/*
