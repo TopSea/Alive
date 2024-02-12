@@ -20,6 +20,10 @@
 正式版全力开发中。   
 关注我（[GoAHi](https://space.bilibili.com/307219768)），更快获得发布信息。
 
+## 安装使用
+参考这个视频：[https://www.bilibili.com/video/BV1B6421g7p9/](https://www.bilibili.com/video/BV1B6421g7p9/)      
+**关于 alive_mmd.json 的编写规范：[关于 .alive_mmd.json](./docs/alive_mmd.md) 。**
+
 ## 功能实现计划
 ### 已实现的功能
 - [x] Live2d 和 MMD 模式切换
@@ -65,7 +69,6 @@ MMD：babylonjs 和 babylon-mmd。
 * 丘丘摇动作 ==> 作者：[Ponx_迫奈熏](https://space.bilibili.com/345268724)，下载地址：[胡桃待机动作-丘丘摇](https://www.aplaybox.com/details/motion/HDLRono2SdAG)   
 
 **模型和动作文件不为本项目所有。本项目对模型和动作的使用已征得作者同意，如果你要将模型和动作用在他处请遵守作者的使用要求。**    
-**关于 alive_mmd.json 的编写规范：[关于 .alive_mmd.json](./docs/alive_mmd.md) 。**
 
 ## 关于项目
 一切的开始是因为碧蓝航线之前更新了一个拉菲的兔女郎服装（对兔女郎毫无抵抗力.jpg）。  
