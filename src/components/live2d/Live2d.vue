@@ -12,6 +12,7 @@ import NumChange from "../NumChange.vue";
 import { Store } from "tauri-plugin-store-api";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { listen, emit as tauriEmit } from "@tauri-apps/api/event";
+import { txt, txtHover } from "../../theme/color";
 
 onBeforeMount(() => {
   (window as any).PIXI = PIXI;
@@ -25,9 +26,6 @@ const sModelVoice = ref(await store.get("model_voice") as boolean)
 const sModelScale = ref(await store.get("model_scale") as number)
 const sModelX = ref(await store.get("model_x") as number)
 const sModelY = ref(await store.get("model_y") as number)
-
-const txt = ref("text-gray-950")
-const txtHover = ref("hover:text-blue-950")
 
 console.log("modelURL:", modelURL);
 
@@ -131,7 +129,7 @@ onMounted(() => {
     <canvas ref="live2d_canvas" class="w-full h-full"></canvas>
 
     <ul v-if="isModelReady" data-tauri-drag-region
-      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-white/30">
+      class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-alive-active/30 dark:bg-alive-actived/30">
       <li class="w-8 h-8" @click="reloadPage">
         <ArrowPathIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
@@ -141,25 +139,25 @@ onMounted(() => {
       </li>
 
       <li class=" w-8 h-8">
-        <MagnifyingGlassPlusIcon v-if="isModelZooming" :class="'w-8 h-8 text-blue-400 brightness-120 blur-sm'" />
+        <MagnifyingGlassPlusIcon v-if="isModelZooming" :class="'w-8 h-8 text-alive-txthd brightness-120 blur-sm'" />
         <MagnifyingGlassPlusIcon
           @click="() => { isModelZooming = !isModelZooming; isModelUDing = false; isModelLRing = false; }"
-          :class="isModelZooming ? 'w-8 h-8 text-blue-500 relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
+          :class="isModelZooming ? 'w-8 h-8 text-alive-txth dark:text-alive-txthd relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
         <NumChange v-if="isModelZooming" v-bind:posTop="112" @minus-event="() => { changeModelZoom(false) }"
           @plus-event="() => { changeModelZoom(true) }" />
       </li>
       <li class="w-8 h-8">
-        <ArrowsRightLeftIcon v-if="isModelLRing" :class="'w-8 h-8 text-blue-400 brightness-120 blur-sm'" />
+        <ArrowsRightLeftIcon v-if="isModelLRing" :class="'w-8 h-8 text-alive-txthd brightness-120 blur-sm'" />
         <ArrowsRightLeftIcon
           @click="() => { isModelLRing = !isModelLRing; isModelUDing = false; isModelZooming = false; }"
-          :class="isModelLRing ? 'w-8 h-8 text-blue-500 relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
+          :class="isModelLRing ? 'w-8 h-8 text-alive-txth dark:text-alive-txthd relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
         <NumChange v-if="isModelLRing" v-bind:posTop="159" @minus-event="() => { changeModelLR(false) }"
           @plus-event="() => { changeModelLR(true) }" />
       </li>
       <li class=" w-8 h-8 group/tb">
-        <ArrowsUpDownIcon v-if="isModelUDing" :class="'w-8 h-8 text-blue-400 brightness-120 blur-sm'" />
+        <ArrowsUpDownIcon v-if="isModelUDing" :class="'w-8 h-8 text-alive-txthd brightness-120 blur-sm'" />
         <ArrowsUpDownIcon @click="() => { isModelUDing = !isModelUDing; isModelLRing = false; isModelZooming = false; }"
-          :class="isModelUDing ? 'w-8 h-8 text-blue-500 relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
+          :class="isModelUDing ? 'w-8 h-8 text-alive-txth dark:text-alive-txthd relative -top-8 ' : [txt,txtHover,'w-8 h-8']" />
         <NumChange v-if="isModelUDing" v-bind:posTop="206" @minus-event="() => { changeModelUD(false) }"
           @plus-event="() => { changeModelUD(true) }" />
       </li>

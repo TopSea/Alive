@@ -14,6 +14,7 @@ import { listen, emit as tauriEmit } from '@tauri-apps/api/event';
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import NumChange from "../NumChange.vue";
+import { txt, txtHover } from "../../theme/color";
 
 const resourceDirPath = await resourceDir();
 const path = await join(resourceDirPath, 'data', 'sets_mmd.json');
@@ -22,9 +23,6 @@ const mmdAliveUrl = await store.get("mmd_alive_url") as string;
 const sVolume = ref(await store.get("volume") as number)
 const sMmdCamera = ref(await store.get("is_mmd_camera") as boolean)
 const sPaused = ref(await store.get("is_paused") as boolean)
-
-const txt = ref("text-alive-txt dark:text-alive-txtd")
-const txtHover = ref("hover:text-alive-txth dark:hover:text-alive-txthd")
 
 const isVolumeChanging = ref(false)
 const dancing = ref(false)
@@ -130,8 +128,8 @@ onMounted(() => {
       </li>
       
       <li class="w-8 h-8">
-        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="['text-alive-txthd w-8 h-8 blur-sm']" />
-        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="['text-alive-txthd w-8 h-8 blur-sm']" />
+        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="['text-alive-txthd brightness-120 w-8 h-8 blur-sm']" />
+        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="['text-alive-txthd brightness-120 w-8 h-8 blur-sm']" />
         <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }" 
           :class="isVolumeChanging ? [txtHover,'text-alive-txth dark:text-alive-txthd w-8 h-8 relative -top-8 ']:[txt,txtHover,'w-8 h-8']" />
         <SpeakerXMarkIcon v-else @click="() => { isVolumeChanging = !isVolumeChanging }"
