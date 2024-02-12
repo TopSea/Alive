@@ -1174,6 +1174,10 @@ select {
   margin: 0.25rem;
 }
 
+.m-2 {
+  margin: 0.5rem;
+}
+
 .mx-1 {
   margin-left: 0.25rem;
   margin-right: 0.25rem;
@@ -1354,6 +1358,11 @@ select {
   height: 100lvh;
 }
 
+.h-max {
+  height: -moz-max-content;
+  height: max-content;
+}
+
 .w-2 {
   width: 0.5rem;
 }
@@ -1416,6 +1425,16 @@ select {
 
 .w-lvw {
   width: 100lvw;
+}
+
+.w-fit {
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.w-max {
+  width: -moz-max-content;
+  width: max-content;
 }
 
 .flex-1 {
@@ -1953,6 +1972,14 @@ select {
   padding: 1.5rem;
 }
 
+.p-2 {
+  padding: 0.5rem;
+}
+
+.p-1 {
+  padding: 0.25rem;
+}
+
 .px-1 {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
@@ -2348,6 +2375,10 @@ select {
 
 .hover\:rounded-2xl:hover {
   border-radius: 1rem;
+}
+
+.hover\:border-2:hover {
+  border-width: 2px;
 }
 
 .hover\:text-alive-txth:hover {

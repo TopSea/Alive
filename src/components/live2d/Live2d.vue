@@ -127,8 +127,8 @@ onMounted(() => {
 
 
 <template>
-  <div class="w-full h-full static group/menu-mmd">
-    <canvas ref="live2d_canvas" class="w-full h-full group-hover/menu-mmd:border-2 border-dashed border-gray-100"></canvas>
+  <div class="w-full h-full p-1 static group/menu-mmd hover:border-2 border-dashed border-gray-100">
+    <canvas ref="live2d_canvas" class="w-full h-full"></canvas>
 
     <ul v-if="isModelReady" data-tauri-drag-region
       class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-white/30">
