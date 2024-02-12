@@ -64,6 +64,9 @@ async function listenEvents() {
   await listen('event_open_settings', (_event: any) => {
     openSettings()
   });
+  await listen('hello_alive', (_event: any) => {
+    console.log("Hello from client.");
+  });
 }
 
 function openSettings() {

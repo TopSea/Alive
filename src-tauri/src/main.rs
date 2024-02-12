@@ -2,11 +2,60 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::{
-    CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, Position, Size, SystemTray,
-    SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Wry,
+    CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, Position, Size, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Window, Wry
 };
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_store::{with_store, StoreCollection};
+use axum::{
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get, post},
+    Json, Router,
+};
+use serde::{Deserialize, Serialize};
+
+static mut ALIVE_WINDOW: Option<Window> = None;
+
+
+#[derive(Deserialize)]
+struct ChangeMotion {
+    text: String,
+    finished: bool,
+}
+
+// the output to our `create_user` handler
+#[derive(Serialize)]
+struct Motion {
+    id: u64,
+    username: String,
+}
+
+async fn hello_alive() -> &'static str {
+    println!("Hello from client.{}", 123);
+    unsafe {
+        match &ALIVE_WINDOW {
+            Some(window) => {
+                window.emit("hello_alive", true).unwrap();
+            },
+            None => todo!(),
+        }
+    }
+    "Hello Alive"
+}
+
+
+async fn start_http_server() {
+    // build our application with a route
+    let app = Router::new()
+        // `GET /` goes to `root`
+        .route("/", get(hello_alive));
+
+    // run our app with hyper
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:20177")
+        .await
+        .unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
 
 fn main() {
     tauri::Builder::default()
@@ -16,7 +65,14 @@ fn main() {
         ))
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
-            let window = app.get_window("main").unwrap();
+            let main_window = app.get_window("main");
+
+            unsafe { ALIVE_WINDOW = main_window.clone() };
+            tauri::async_runtime::spawn(
+                start_http_server()
+            );
+
+            let window = main_window.unwrap();
             let _ = window.set_skip_taskbar(true);
 
             // 读取并设置窗口大小和位置的信息

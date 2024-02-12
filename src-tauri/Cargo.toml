@@ -14,10 +14,13 @@ tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
 tauri = { version = "1.5", features = [ "updater", "api-all", "system-tray"] }
-serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tauri-plugin-store = { git = "https://mirror.ghproxy.com/https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-autostart = { git = "https://mirror.ghproxy.com/https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+serde = { version = "1.0", features = ["derive"] }
+axum = "0.7.4"
+tokio = { version = "1.36.0", features = ["full"] }
+tower = "0.4.13"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
