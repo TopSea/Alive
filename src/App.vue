@@ -2,7 +2,7 @@
 import { onBeforeMount, onMounted, ref } from "vue";
 import Live2d from "./components/live2d/Live2d.vue";
 import MMD from "./components/mmd/MMD.vue"
-import { UnlistenFn, listen } from "@tauri-apps/api/event";
+import { UnlistenFn, emit, listen } from "@tauri-apps/api/event";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
@@ -66,6 +66,14 @@ async function listenEvents() {
   });
   await listen('hello_alive', (_event: any) => {
     console.log("Hello from client.");
+  });
+  await listen('change_motion', async (event: any) => {
+    console.log("Changing motion.");
+    const motion = event.payload;
+    // 先只做 MMD 吧
+    if (isMMD.value && motion.mode === "mmd") {
+      await appWindow.emit("change_mmd_motion", motion)
+    }
   });
 }
 
