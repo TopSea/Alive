@@ -1,63 +1,92 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::{
-    CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, Position, Size, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Window, Wry
-};
-use tauri_plugin_autostart::MacosLauncher;
-use tauri_plugin_store::{with_store, StoreCollection};
 use axum::{
+    extract::Path,
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
+use std::sync::OnceLock;
+use tauri::{
+    api::file::Move, async_runtime::{block_on, handle}, CustomMenuItem, Event, Manager, PhysicalPosition,
+    PhysicalSize, Position, Size, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+    Window, Wry,
+};
+use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_store::{with_store, StoreCollection};
 
-static mut ALIVE_WINDOW: Option<Window> = None;
+static ALIVE_WINDOW: OnceLock<Window> = OnceLock::new();
 
-
-#[derive(Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 struct ChangeMotion {
-    text: String,
-    finished: bool,
+    interrupt: bool,
+    mode: String,
+    motion_name: String,
 }
 
 // the output to our `create_user` handler
 #[derive(Serialize)]
 struct Motion {
-    id: u64,
-    username: String,
+    mode: String,
+    playing_motion: String,
 }
 
 async fn hello_alive() -> &'static str {
     println!("Hello from client.{}", 123);
-    unsafe {
-        match &ALIVE_WINDOW {
-            Some(window) => {
-                window.emit("hello_alive", true).unwrap();
-            },
-            None => todo!(),
+    match &ALIVE_WINDOW.get() {
+        Some(window) => {
+            window.emit("hello_alive", true).unwrap();
         }
+        None => todo!(),
     }
     "Hello Alive"
 }
+async fn change_motion(Json(payload): Json<ChangeMotion>) -> impl IntoResponse {
+    let mode = &payload.mode;
+    let motion = &payload.motion_name;
+    println!("Change {} motion to {}.", &mode, &motion);
+    match &ALIVE_WINDOW.get() {
+        Some(window) => {
+            window.emit("change_motion", &payload).unwrap();
 
+            // insert your application logic here
+            let motion = Motion {
+                mode: mode.to_string(),
+                playing_motion: motion.to_string(),
+            };
+            // window.unlisten(result);
+            (StatusCode::CREATED, Json(motion))
+        }
+        None => {
+            // insert your application logic here
+            let motion = Motion {
+                mode: "none".into(),
+                playing_motion: "none".into(),
+            };
+            (StatusCode::BAD_REQUEST, Json(motion))
+        }
+    }
+}
 
 async fn start_http_server() {
     // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
-        .route("/", get(hello_alive));
+        .route("/", get(hello_alive))
+        .route("/change/motion", post(change_motion));
 
     // run our app with hyper
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:20177")
+    let listener = tokio::net::TcpListener::bind("10.158.197.102:20177")
         .await
         .unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(
             MacosLauncher::LaunchAgent,
@@ -67,12 +96,10 @@ fn main() {
         .setup(|app| {
             let main_window = app.get_window("main");
 
-            unsafe { ALIVE_WINDOW = main_window.clone() };
-            tauri::async_runtime::spawn(
-                start_http_server()
-            );
+            tauri::async_runtime::spawn(start_http_server());
 
             let window = main_window.unwrap();
+            _ = ALIVE_WINDOW.set(window.clone());
             let _ = window.set_skip_taskbar(true);
 
             // 读取并设置窗口大小和位置的信息

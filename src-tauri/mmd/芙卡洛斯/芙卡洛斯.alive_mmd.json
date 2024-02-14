@@ -29,10 +29,7 @@
         }
     ],
     "pose_motions": [
-        "pose2",
-        "dance1",
-        "dance1",
-        "dance1"
+        "pose2"
     ],
     "dance_motions": [
         "dance1"

@@ -425,10 +425,54 @@ export class SceneBuilder implements ISceneBuilder {
             }
         });
         await listen('event_mmd_voice', (event: any) => {
-            const volume = event.payload as number
+            const volume = event.payload as number;
             this._options.volume = volume;
             audioPlayer.volume = volume;
             console.log("event_mmd_voice ", volume);
+        });
+        await listen('change_mmd_motion', (event: any) => {
+            const changeMotion = event.payload;
+            const motionName = changeMotion.motion_name
+            console.log("Change to: ", motionName);
+
+            const theMotion = sets.alive_motions.find((motion:any) => {
+                return motion.motion_name === motionName;
+            });
+            
+            // 有这个动作
+            if (theMotion) {
+                mmdRuntime.pauseAnimation();
+                mmdRuntime.seekAnimation(0);
+                // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
+                mmdCamera.position = new Vector3(0, 10, 0);
+                mmdCamera.rotation = new Vector3(0, 0, 0);
+                mmdCamera.distance = -45;
+                mmdCamera.fov = 0.8;
+    
+                // 清除掉定时器，不然定时器到时间后就会切换动画
+                clearTimeout(this._loopId);
+    
+                // 删除场景中的 extra
+                const extraModel = this._aliveExtra as MmdModel;
+                if (extraModel !== null) {
+                    mmdRuntime.destroyMmdModel(extraModel);
+                    extraModel.dispose();
+                    extraModel.mesh.dispose();
+                    this._aliveExtra = null;
+                }
+                // 加载下个场景中的 extra
+                loadExtras(motionName);
+
+                mmdCamera.setAnimation(motionName);
+                mmdModel.setAnimation(motionName);
+                this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
+
+                mmdRuntime.playAnimation();
+                console.log("mmdRuntime animationDuration:", mmdRuntime.animationDuration);
+
+                // 重新设置定时器
+                this.animationLoop(animteLoop);
+            }
         });
         await listen('event_mmd_dancing', async (event: any) => {
             const dancing = event.payload as boolean;
