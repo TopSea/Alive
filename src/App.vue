@@ -2,7 +2,7 @@
 import { onBeforeMount, onMounted, ref } from "vue";
 import Live2d from "./components/live2d/Live2d.vue";
 import MMD from "./components/mmd/MMD.vue"
-import { UnlistenFn, emit, listen } from "@tauri-apps/api/event";
+import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
