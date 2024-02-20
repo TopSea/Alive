@@ -2,7 +2,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use axum::{
-    extract::Path,
     http::StatusCode,
     response::IntoResponse,
     routing::{get, post},
@@ -10,8 +9,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::sync::OnceLock;
-use tauri::{
-    api::file::Move, async_runtime::{block_on, handle}, CustomMenuItem, Event, Manager, PhysicalPosition,
+use tauri::{CustomMenuItem, Manager, PhysicalPosition,
     PhysicalSize, Position, Size, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
     Window, Wry,
 };
