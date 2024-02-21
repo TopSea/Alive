@@ -15,6 +15,7 @@ import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import NumChange from "../NumChange.vue";
 import { txt, txtHover } from "../../theme/color";
+import { writeTextFile } from '@tauri-apps/api/fs';
 
 const resourceDirPath = await resourceDir();
 const path = await join(resourceDirPath, 'data', 'sets_mmd.json');
@@ -38,6 +39,21 @@ async function listenEvents() {
   await listen('event_mmd_url', (_event: any) => {
     console.log("event_model_url");
     reloadPage()
+  });
+  await listen('change_mmd_volume', async (event: any) => {
+    console.log("event_model_url");
+    var volume = event.payload.volume
+    if (volume >= 1) {
+      volume = 1
+    } else if (volume <= 0) {
+      volume = 0
+    } 
+    const filePath = event.payload.uu_json;
+    console.log("volume file path: ", filePath);
+    writeTextFile(filePath, '{"mode":"mmd","volume":' + volume + '}')
+    await store.set("volume", volume);
+    await store.save();
+    await tauriEmit('event_mmd_voice', volume);
   });
 }
 async function changeCamera() {

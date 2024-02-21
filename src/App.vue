@@ -75,6 +75,15 @@ async function listenEvents() {
       await appWindow.emit("change_mmd_motion", motion)
     }
   });
+  await listen('change_volume', async (event: any) => {
+    const volume = event.payload;
+    console.log("Changing volume: ", volume);
+    
+    // 先只做 MMD 吧
+    if (isMMD.value && volume.mode === "mmd") {
+      await appWindow.emit("change_mmd_volume", volume)
+    }
+  });
 }
 
 function openSettings() {

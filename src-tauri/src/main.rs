@@ -2,19 +2,25 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use axum::{
+    extract::State,
     http::StatusCode,
-    response::IntoResponse,
+    response::{IntoResponse, Response},
     routing::{get, post},
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use std::sync::OnceLock;
-use tauri::{CustomMenuItem, Manager, PhysicalPosition,
-    PhysicalSize, Position, Size, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
-    Window, Wry,
+use std::{
+    fs::File,
+    io::{Read, Write},
+    sync::OnceLock,
+};
+use tauri::{
+    App, AppHandle, CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, Position, Size,
+    SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Window, Wry,
 };
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_store::{with_store, StoreCollection};
+use tokio::{self, runtime::Runtime, task::futures, time};
 
 static ALIVE_WINDOW: OnceLock<Window> = OnceLock::new();
 
@@ -24,12 +30,28 @@ struct ChangeMotion {
     mode: String,
     motion_name: String,
 }
+#[derive(Clone, Serialize, Deserialize)]
+struct ChangeVolume {
+    mode: String,
+    volume: f32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    uu_json: Option<String>,
+}
 
-// the output to our `create_user` handler
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 struct Motion {
     mode: String,
     playing_motion: String,
+}
+#[derive(Serialize, Deserialize)]
+struct Volume {
+    mode: String,
+    volume: f32,
+}
+#[derive(Serialize)]
+struct ErrorResponse {
+    error: String,
+    info: String,
 }
 
 async fn hello_alive() -> &'static str {
@@ -55,6 +77,27 @@ async fn change_motion(Json(payload): Json<ChangeMotion>) -> impl IntoResponse {
                 mode: mode.to_string(),
                 playing_motion: motion.to_string(),
             };
+
+            let mut done = false;
+            let mut mill_sec = 0;
+            // listen to the `event-name` (emitted on any window)
+            while done {
+                if mill_sec >= 3000 {
+                    break;
+                }
+                // 阻塞到回应，或者阻塞 3 秒钟
+                time::sleep_until(time::Instant::now() + time::Duration::from_millis(300)).await;
+            }
+            // let result = window.listen("change_motion_done", move |event| {
+            //     println!("got event-name with payload {:?}", event.payload());
+            //     done = true;
+            // });
+            // unlisten to the event using the `id` returned on the `listen_global` function
+            // a `once_global` API is also exposed on the `App` struct
+
+            // 一直睡眠，睡到2秒后醒来
+            time::sleep_until(time::Instant::now() + time::Duration::from_millis(500)).await;
+
             // window.unlisten(result);
             (StatusCode::CREATED, Json(motion))
         }
@@ -68,13 +111,74 @@ async fn change_motion(Json(payload): Json<ChangeMotion>) -> impl IntoResponse {
         }
     }
 }
+async fn change_volume(
+    State(state): State<AppHandle>,
+    Json(payload): Json<ChangeVolume>,
+) -> Response {
+    let mode = &payload.mode;
+    let volume = &payload.volume;
+    println!("Change {} volume to {}.", &mode, &volume);
 
-async fn start_http_server() {
+    let error_resp = ErrorResponse {
+        error: "Alive not responding.".to_string(),
+        info: "Please check you request. More info can be found in doc: https://github.com/TopSea/Alive".to_string()
+    };
+
+    let mut data = std::env::current_dir().unwrap();
+    data.push("data/temp/temp.json");
+    let display = data.display();
+    println!("Create file {}.", &display);
+
+    // 创建文件
+    let _ = File::create(&data);
+
+    let mut done = false;
+    let mut mill_secs = 0;
+    let mut buffer = String::new();
+
+    let volume = ChangeVolume {
+        mode: payload.mode,
+        volume: payload.volume,
+        uu_json: Some(display.to_string()),
+    };
+    let mut file = File::open(data).unwrap();
+    let _ = state.emit_to("main", "change_volume", volume);
+
+    while true {
+        // 超过 3s，退出阻塞
+        if mill_secs >= 10 {
+            break;
+        }
+        // 读取到返回信息，退出阻塞
+        let _ = &file.read_to_string(&mut buffer).unwrap();
+        if buffer.len() > 0 {
+            done = true;
+            break;
+        }
+
+        time::sleep_until(time::Instant::now() + time::Duration::from_millis(300)).await;
+        println!("which sec: {}", mill_secs);
+        mill_secs += 1;
+    }
+
+    match done {
+        true => {
+            // 转换成 Volume 结构
+            let volume: Volume = serde_json::from_str(&buffer).unwrap();
+            return (StatusCode::CREATED, Json(volume)).into_response();
+        }
+        false => return (StatusCode::BAD_REQUEST, Json(error_resp)).into_response(),
+    }
+}
+
+async fn start_http_server(app: AppHandle) {
     // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
         .route("/", get(hello_alive))
-        .route("/change/motion", post(change_motion));
+        .route("/change/motion", post(change_motion))
+        .route("/change/volume", post(change_volume))
+        .with_state(app);
 
     // run our app with hyper
     let listener = tokio::net::TcpListener::bind("10.158.197.102:20177")
@@ -92,9 +196,8 @@ async fn main() {
         ))
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
+            tauri::async_runtime::spawn(start_http_server(app.app_handle().clone()));
             let main_window = app.get_window("main");
-
-            tauri::async_runtime::spawn(start_http_server());
 
             let window = main_window.unwrap();
             _ = ALIVE_WINDOW.set(window.clone());

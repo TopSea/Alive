@@ -28,7 +28,7 @@
       },
       "fs": {
         "all": true,
-        "scope": ["$RESOURCE/*"]
+        "scope": ["**"]
       }
     },
     "bundle": {
@@ -45,7 +45,7 @@
       "resources": [
         "live2d/*",
         "mmd/*",
-        "data/*"
+        "data/**"
       ],
       "windows": {
         "wix": {
