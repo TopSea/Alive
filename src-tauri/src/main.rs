@@ -2,25 +2,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use axum::{
-    extract::State,
-    http::StatusCode,
-    response::{IntoResponse, Response},
-    routing::{get, post},
-    Json, Router,
+    body::Body, extract::State, http::{response, StatusCode}, response::{IntoResponse, Response}, routing::{get, post}, Json, Router
 };
-use serde::{Deserialize, Serialize};
-use std::{
-    fs::File,
-    io::{Read, Write},
-    sync::OnceLock,
-};
+use serde::{de, Deserialize, Serialize};
+use std::{fs::File, io::Read, sync::OnceLock};
 use tauri::{
-    App, AppHandle, CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, Position, Size,
-    SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Window, Wry,
+    AppHandle, CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, Position, Size, SystemTray,
+    SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, Window, Wry,
 };
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_store::{with_store, StoreCollection};
-use tokio::{self, runtime::Runtime, task::futures, time};
+use tokio::{self, fs::remove_file, time};
+use uuid::Uuid;
 
 static ALIVE_WINDOW: OnceLock<Window> = OnceLock::new();
 
@@ -29,6 +22,8 @@ struct ChangeMotion {
     interrupt: bool,
     mode: String,
     motion_name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    uu_json: Option<String>,
 }
 #[derive(Clone, Serialize, Deserialize)]
 struct ChangeVolume {
@@ -49,10 +44,15 @@ struct Volume {
     volume: f32,
 }
 #[derive(Serialize)]
-struct ErrorResponse {
-    error: String,
-    info: String,
+struct ErrorResponse<'a> {
+    error: &'a str,
+    info: &'a str,
 }
+static ERROR_RESP: ErrorResponse = ErrorResponse {
+    error: "Alive not responding.",
+    info:
+        "Please check you request. More info can be found in doc: https://github.com/TopSea/Alive",
+};
 
 async fn hello_alive() -> &'static str {
     println!("Hello from client.{}", 123);
@@ -64,93 +64,35 @@ async fn hello_alive() -> &'static str {
     }
     "Hello Alive"
 }
-async fn change_motion(Json(payload): Json<ChangeMotion>) -> impl IntoResponse {
-    let mode = &payload.mode;
-    let motion = &payload.motion_name;
-    println!("Change {} motion to {}.", &mode, &motion);
-    match &ALIVE_WINDOW.get() {
-        Some(window) => {
-            window.emit("change_motion", &payload).unwrap();
 
-            // insert your application logic here
-            let motion = Motion {
-                mode: mode.to_string(),
-                playing_motion: motion.to_string(),
-            };
-
-            let mut done = false;
-            let mut mill_sec = 0;
-            // listen to the `event-name` (emitted on any window)
-            while done {
-                if mill_sec >= 3000 {
-                    break;
-                }
-                // 阻塞到回应，或者阻塞 3 秒钟
-                time::sleep_until(time::Instant::now() + time::Duration::from_millis(300)).await;
-            }
-            // let result = window.listen("change_motion_done", move |event| {
-            //     println!("got event-name with payload {:?}", event.payload());
-            //     done = true;
-            // });
-            // unlisten to the event using the `id` returned on the `listen_global` function
-            // a `once_global` API is also exposed on the `App` struct
-
-            // 一直睡眠，睡到2秒后醒来
-            time::sleep_until(time::Instant::now() + time::Duration::from_millis(500)).await;
-
-            // window.unlisten(result);
-            (StatusCode::CREATED, Json(motion))
-        }
-        None => {
-            // insert your application logic here
-            let motion = Motion {
-                mode: "none".into(),
-                playing_motion: "none".into(),
-            };
-            (StatusCode::BAD_REQUEST, Json(motion))
-        }
-    }
-}
-async fn change_volume(
-    State(state): State<AppHandle>,
-    Json(payload): Json<ChangeVolume>,
-) -> Response {
-    let mode = &payload.mode;
-    let volume = &payload.volume;
-    println!("Change {} volume to {}.", &mode, &volume);
-
-    let error_resp = ErrorResponse {
-        error: "Alive not responding.".to_string(),
-        info: "Please check you request. More info can be found in doc: https://github.com/TopSea/Alive".to_string()
-    };
-
-    let mut data = std::env::current_dir().unwrap();
-    data.push("data/temp/temp.json");
-    let display = data.display();
+fn create_temp_file() -> String {
+    let mut base_path = std::env::current_dir().unwrap();
+    let file_name = Uuid::new_v4().to_string() + ".json";
+    let file_path = "data/temp/".to_string() + &file_name;
+    base_path.push(file_path);
+    let display = base_path.display();
     println!("Create file {}.", &display);
 
     // 创建文件
-    let _ = File::create(&data);
+    let _ = File::create(&base_path);
+    return display.to_string();
+}
 
+async fn wait_response(
+    ref_path: &String,
+) -> Response {
+    let mut file = File::open(ref_path).unwrap();
     let mut done = false;
     let mut mill_secs = 0;
     let mut buffer = String::new();
-
-    let volume = ChangeVolume {
-        mode: payload.mode,
-        volume: payload.volume,
-        uu_json: Some(display.to_string()),
-    };
-    let mut file = File::open(data).unwrap();
-    let _ = state.emit_to("main", "change_volume", volume);
-
+    
     while true {
         // 超过 3s，退出阻塞
         if mill_secs >= 10 {
             break;
         }
         // 读取到返回信息，退出阻塞
-        let _ = &file.read_to_string(&mut buffer).unwrap();
+        let _ = file.read_to_string(&mut buffer).unwrap();
         if buffer.len() > 0 {
             done = true;
             break;
@@ -161,14 +103,54 @@ async fn change_volume(
         mill_secs += 1;
     }
 
+    // 完事删除文件
+    _ = remove_file(ref_path).await;
+
     match done {
-        true => {
-            // 转换成 Volume 结构
-            let volume: Volume = serde_json::from_str(&buffer).unwrap();
-            return (StatusCode::CREATED, Json(volume)).into_response();
-        }
-        false => return (StatusCode::BAD_REQUEST, Json(error_resp)).into_response(),
+        true => return (StatusCode::BAD_REQUEST, buffer).into_response(),
+        false => return (StatusCode::BAD_REQUEST, Json(&ERROR_RESP)).into_response(),
     }
+}
+
+async fn change_motion(
+    State(app_handler): State<AppHandle>,
+    Json(payload): Json<ChangeMotion>
+) -> Response {
+    let mode = &payload.mode;
+    let motion = &payload.motion_name;
+    println!("Change {} motion to {}.", &mode, &motion);
+
+    let file_path = create_temp_file();
+    let request_motion = ChangeMotion {
+        mode: mode.to_string(),
+        motion_name: motion.to_string(),
+        interrupt: payload.interrupt,
+        uu_json: Some(file_path.to_string()),
+    };
+
+    _ = app_handler.emit_to("main", "change_motion", &request_motion);
+
+    return wait_response(&file_path).await;
+}
+
+async fn change_volume(
+    State(app_handler): State<AppHandle>,
+    Json(payload): Json<ChangeVolume>,
+) -> Response {
+    let mode = &payload.mode;
+    let volume = &payload.volume;
+    println!("Change {} volume to {}.", &mode, &volume);
+
+    let file_path = create_temp_file();
+
+    let request_volume = ChangeVolume {
+        mode: payload.mode,
+        volume: payload.volume,
+        uu_json: Some(file_path.to_string()),
+    };
+    _ = app_handler.emit_to("main", "change_volume", request_volume);
+
+    return wait_response(&file_path).await;
 }
 
 async fn start_http_server(app: AppHandle) {
