@@ -42,6 +42,7 @@ import type { ISceneBuilder, AliveMmdOptions } from "./MMDRuntime";
 import { listen } from "@tauri-apps/api/event";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 import { parallelLoadAsync } from "./parallelLoadAsync";
+import { writeTextFile } from '@tauri-apps/api/fs';
 
 type InAnimationLoop = (mmdDancing: boolean) => void;
 
@@ -56,6 +57,7 @@ export class SceneBuilder implements ISceneBuilder {
         volume: 0.8
     };
     private _aliveExtra: any = null;
+    private _nextMotion: string = "";
 
     public async build(canvas: HTMLCanvasElement, engine: Engine, aliveMmdOptions: AliveMmdOptions): Promise<Scene> {
         console.log("SceneBuilder build");
@@ -171,7 +173,7 @@ export class SceneBuilder implements ISceneBuilder {
         const mmdRuntime = new MmdRuntime(scene);
         mmdRuntime.loggingEnabled = true
         mmdRuntime.register(scene);
-        
+
         // 音频
         const audioPlayer = new StreamAudioPlayer(scene);
         audioPlayer.volume = this._options.volume;
@@ -268,16 +270,16 @@ export class SceneBuilder implements ISceneBuilder {
         } else {
             scene.activeCamera = camera;
         }
-        
+
 
         // 加载 extra 和背景音乐
         const loadExtras = async (motionName: string) => {
             const alive = aliveMotions.find((aliveMotion) => motionName === aliveMotion.motion_name);
-            const extraMotions: any[] =  alive.extra.e_motions;
+            const extraMotions: any[] = alive.extra.e_motions;
             const extraAliveMmdModel: string = alive.extra.e_model;
-            if (extraAliveMmdModel !== "" ) {
+            if (extraAliveMmdModel !== "") {
                 console.log("loading extra...", extraAliveMmdModel);
-                
+
                 const [
                     extraAnimation,
                     extraMesh,
@@ -296,7 +298,7 @@ export class SceneBuilder implements ISceneBuilder {
                         ).then(result => result.meshes[0] as MmdMesh);
                     }]
                 ]);
-    
+
                 for (const mesh of extraMesh.metadata.meshes) mesh.receiveShadows = true;
                 shadowGenerator.addShadowCaster(extraMesh);
                 extraMesh.parent = mmdRoot;
@@ -316,7 +318,7 @@ export class SceneBuilder implements ISceneBuilder {
         // 回到默认状态
         const toDefault = () => {
             audioPlayer.currentTime = 0;
-            
+
             // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
             mmdCamera.position = new Vector3(0, 10, 0);
             mmdCamera.rotation = new Vector3(0, 0, 0);
@@ -335,11 +337,16 @@ export class SceneBuilder implements ISceneBuilder {
         // 动作循环
         const animteLoop: InAnimationLoop = async (mmdDancing) => {
             toDefault();
-            
-            const nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.pose_motions);
+
+            var nextMotion: string = ""
+            if (this._nextMotion !== "") {
+                nextMotion = this._nextMotion;
+            } else {
+                nextMotion = this.randomAnimation(mmdDancing ? sets.dance_motions : sets.pose_motions);
+            }
             // 加载下个场景中的 extra
             loadExtras(nextMotion);
-            
+
             mmdRuntime.seekAnimation(0);
             mmdCamera.setAnimation(nextMotion);
             mmdCamera.animate(0);
@@ -432,51 +439,67 @@ export class SceneBuilder implements ISceneBuilder {
         });
         await listen('change_mmd_motion', (event: any) => {
             const changeMotion = event.payload;
+            const interrupt = changeMotion.interrupt;
+            const filePath = changeMotion.uu_json;
             const motionName = changeMotion.motion_name
             console.log("Change to: ", motionName);
 
-            const theMotion = sets.alive_motions.find((motion:any) => {
+            const theMotion = sets.alive_motions.find((motion: any) => {
                 return motion.motion_name === motionName;
             });
-            
+
             // 有这个动作
             if (theMotion) {
-                mmdRuntime.pauseAnimation();
-                mmdRuntime.seekAnimation(0);
-                // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
-                mmdCamera.position = new Vector3(0, 10, 0);
-                mmdCamera.rotation = new Vector3(0, 0, 0);
-                mmdCamera.distance = -45;
-                mmdCamera.fov = 0.8;
-    
-                // 清除掉定时器，不然定时器到时间后就会切换动画
-                clearTimeout(this._loopId);
-    
-                // 删除场景中的 extra
-                const extraModel = this._aliveExtra as MmdModel;
-                if (extraModel !== null) {
-                    mmdRuntime.destroyMmdModel(extraModel);
-                    extraModel.dispose();
-                    extraModel.mesh.dispose();
-                    this._aliveExtra = null;
+                // 打断当前的动作
+                if (interrupt) {
+                    writeTextFile(
+                        filePath, 
+                        '{"mode":"mmd","curr_motion":' + motionName + ',"next_motion":"UNKNOWN"}'
+                    )
+
+                    mmdRuntime.pauseAnimation();
+                    mmdRuntime.seekAnimation(0);
+                    // 重置 mmd 相机位置，防止没有相机动作时相机位置错误
+                    mmdCamera.position = new Vector3(0, 10, 0);
+                    mmdCamera.rotation = new Vector3(0, 0, 0);
+                    mmdCamera.distance = -45;
+                    mmdCamera.fov = 0.8;
+
+                    // 清除掉定时器，不然定时器到时间后就会切换动画
+                    clearTimeout(this._loopId);
+
+                    // 删除场景中的 extra
+                    const extraModel = this._aliveExtra as MmdModel;
+                    if (extraModel !== null) {
+                        mmdRuntime.destroyMmdModel(extraModel);
+                        extraModel.dispose();
+                        extraModel.mesh.dispose();
+                        this._aliveExtra = null;
+                    }
+                    // 加载下个场景中的 extra
+                    loadExtras(motionName);
+
+                    mmdCamera.setAnimation(motionName);
+                    mmdModel.setAnimation(motionName);
+                    this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
+
+                    mmdRuntime.playAnimation();
+                    console.log("mmdRuntime animationDuration:", mmdRuntime.animationDuration);
+
+                    // 重新设置定时器
+                    this.animationLoop(animteLoop);
+                } else {
+                    writeTextFile(
+                        filePath, 
+                        '{"mode":"mmd","curr_motion":"UNKNOWN","next_motion":"' + motionName + '"}'
+                    )
+                    this._nextMotion = motionName
                 }
-                // 加载下个场景中的 extra
-                loadExtras(motionName);
-
-                mmdCamera.setAnimation(motionName);
-                mmdModel.setAnimation(motionName);
-                this._currDuration = mmdRuntime.animationDuration * 1000 + interval;
-
-                mmdRuntime.playAnimation();
-                console.log("mmdRuntime animationDuration:", mmdRuntime.animationDuration);
-
-                // 重新设置定时器
-                this.animationLoop(animteLoop);
             }
         });
         await listen('event_mmd_dancing', async (event: any) => {
             const dancing = event.payload as boolean;
-            
+
             mmdRuntime.pauseAnimation();
             mmdRuntime.seekAnimation(0);
             // 重置 mmd 相机位置，防止没有相机动作时相机位置错误

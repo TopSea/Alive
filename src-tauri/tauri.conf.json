@@ -45,7 +45,7 @@
       "resources": [
         "live2d/*",
         "mmd/*",
-        "data/**"
+        "data/*"
       ],
       "windows": {
         "wix": {
