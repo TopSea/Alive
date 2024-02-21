@@ -48,8 +48,8 @@ async function listenEvents() {
     } else if (volume <= 0) {
       volume = 0
     } 
+    sVolume.value = volume
     const filePath = event.payload.uu_json;
-    console.log("volume file path: ", filePath);
     writeTextFile(filePath, '{"mode":"mmd","volume":' + volume + '}')
     await store.set("volume", volume);
     await store.save();
