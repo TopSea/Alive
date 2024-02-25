@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { onBeforeMount, onMounted, ref } from "vue";
-import Live2d from "./components/live2d/Live2d.vue";
-import MMD from "./components/mmd/MMD.vue"
 import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "@tauri-apps/plugin-store";
@@ -9,7 +7,9 @@ import { getCurrent, Window } from "@tauri-apps/api/window";
 import { changeDisplayMode, } from "./theme/theme";
 import { onUnmounted } from "vue";
 import { checkAliveUpdate } from "./components/updater/updater";
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 var settingsOpened = false
 const isMMD = ref()
 const autoCheck = ref()
@@ -45,7 +45,8 @@ async function listenEvents() {
   await listen('event_is_mmd', (event: any) => {
     console.log("event_is_mmd: ", event.payload as boolean);
     isMMD.value = event.payload as boolean
-    location.reload()
+    changeMode(isMMD.value? "mmd":"live2d")
+    // location.reload()
   });
   await listen('change_mode', async (event: any) => {
     const mode = event.payload as string
@@ -118,6 +119,12 @@ function openSettings() {
   }
 }
 
+function changeMode(mode: string) {
+  router.push({
+    name: mode
+  })
+}
+
 onBeforeMount(() => {
   initSettings()
 })
@@ -138,8 +145,9 @@ onUnmounted(() => {
 
 <template>
   <Suspense>
-    <Live2d v-if="!isMMD" />
-    <MMD v-else />
+    <div class="w-full h-full">
+      <router-view />
+    </div>
 
     <template #fallback>
       <div>

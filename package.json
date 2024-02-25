@@ -28,7 +28,8 @@
     "pixi-live2d-display": "^0.4.0",
     "pixi.js": "6.5.2",
     "vue": "^3.3.4",
-    "vue-i18n": "^9.9.1"
+    "vue-i18n": "^9.9.1",
+    "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",

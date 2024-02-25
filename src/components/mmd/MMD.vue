@@ -16,6 +16,8 @@ import { Store } from "@tauri-apps/plugin-store";
 import NumChange from "../NumChange.vue";
 import { txt, txtHover } from "../../theme/color";
 import { writeTextFile } from '@tauri-apps/api/fs';
+import { onBeforeUnmount } from "vue";
+import { onUnmounted } from "vue";
 
 const resourceDirPath = await resourceDir();
 const path = await join(resourceDirPath, 'data', 'sets_mmd.json');
@@ -31,6 +33,7 @@ const sPaused = ref(await store.get("is_paused") as boolean)
 const isVolumeChanging = ref(false)
 const dancing = ref(false)
 const mmd_canvas = ref();
+const mmd_runtime = ref();
 
 function reloadPage() {
   location.reload()
@@ -96,7 +99,7 @@ async function changeModelVoice(isAdding: boolean) {
   await store.save();
 }
 
-onMounted(() => {
+onMounted(async () => {
   console.log("MMD onMounted");
   listenEvents()
   const mmdCanvas = mmd_canvas.value as HTMLCanvasElement
@@ -123,13 +126,24 @@ onMounted(() => {
       volume: sVolume.value
   }
 
-  BaseRuntime.Create({
+  mmd_runtime.value = await BaseRuntime.Create({
     canvas: mmdCanvas,
     engine,
     sceneBuilder: new SceneBuilder(),
     aliveMmdOptions: options
-  }).then(runtime => runtime.run());
+  });
+  mmd_runtime.value.run()
+})
 
+onBeforeUnmount(() => {
+  console.log("onBeforeUnmount");
+  if (mmd_runtime.value !== null) {
+    mmd_runtime.value.dispose()
+  }
+})
+onUnmounted(() => {
+  console.log("onUnmounted");
+  
 })
 </script>
 

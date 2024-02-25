@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import "./styles.css";
 import App from "./App.vue";
+import router from "./router/alive_router"
 
 import zh_CN from "./components/lang/zh_CN.json"
 import en_US from "./components/lang/en_US.json"
@@ -14,7 +15,7 @@ const i18n = createI18n({
     fallbackLocale: 'en_US', // set fallback locale
     messages: localeTxt, // set locale messages
 })
-createApp(App).use(i18n).mount("#app");
+createApp(App).use(router).use(i18n).mount("#app");
 
 // npx tailwindcss -i ./src/tailwind.css -o ./src/styles.css --watch
 // https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json
