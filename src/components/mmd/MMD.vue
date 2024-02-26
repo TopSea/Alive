@@ -7,7 +7,7 @@ import { SceneBuilder } from "./MMDBuilder";
 import { onMounted, ref } from "vue";
 import {
   ArrowPathIcon, CameraIcon, PlayIcon, PauseIcon, Cog6ToothIcon, SpeakerWaveIcon, SpeakerXMarkIcon,
-  FilmIcon as DancingIcon
+  FilmIcon as DancingIcon, ArrowsPointingInIcon, 
 } from '@heroicons/vue/24/solid'
 import { FilmIcon } from '@heroicons/vue/24/outline'
 import { listen, emit as tauriEmit } from '@tauri-apps/api/event';
@@ -76,6 +76,9 @@ async function mmdDancing() {
 }
 async function openSettings() {
   await tauriEmit('event_open_settings', true);
+}
+async function minify() {
+  await tauriEmit('minify', true);
 }
 async function changeModelVoice(isAdding: boolean) {
   if (isAdding) {
@@ -177,6 +180,9 @@ onUnmounted(() => {
       </li>
       <li class="w-8 h-8" @click="openSettings">
         <Cog6ToothIcon :class="[txt,txtHover,'w-8 h-8']" />
+      </li>
+      <li class="w-8 h-8" @click="minify">
+        <ArrowsPointingInIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
     </ul>
   </div>

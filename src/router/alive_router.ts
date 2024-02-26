@@ -2,7 +2,7 @@ import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 
 const routes: Array<RouteRecordRaw> = [
     {
-        path: "/",
+        path: "/mmd",
         name: "mmd",
         component: import("../components/mmd/MMD.vue")
     },

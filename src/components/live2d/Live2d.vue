@@ -6,7 +6,7 @@ import * as PIXI from 'pixi.js';
 import { config, Live2DModel } from 'pixi-live2d-display/cubism4';
 import {
   ArrowPathIcon, ArrowsRightLeftIcon, ArrowsUpDownIcon, Cog6ToothIcon, MagnifyingGlassPlusIcon, SpeakerWaveIcon,
-  SpeakerXMarkIcon
+  SpeakerXMarkIcon, ArrowsPointingInIcon, 
 } from '@heroicons/vue/24/solid'
 import NumChange from "../NumChange.vue";
 import { Store } from "tauri-plugin-store-api";
@@ -81,6 +81,10 @@ async function listenEvents() {
 
 function reloadPage() {
   location.reload()
+}
+
+async function minify() {
+  await tauriEmit('minify', true);
 }
 
 async function openSettings() {
@@ -163,6 +167,9 @@ onMounted(() => {
       </li>
       <li class="w-8 h-8" @click="openSettings">
         <Cog6ToothIcon :class="[txt,txtHover,'w-8 h-8']" />
+      </li>
+      <li class="w-8 h-8" @click="minify">
+        <ArrowsPointingInIcon :class="[txt,txtHover,'w-8 h-8']" />
       </li>
     </ul>
   </div>
