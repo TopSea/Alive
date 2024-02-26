@@ -36,16 +36,19 @@
 - [x] 深色模式
 - [x] 自动检查更新
 
-### 0.1.0 计划实现的功能
-- [ ] 多语言切换完善（系统托盘部分）
-- [ ] 升级 Tauri v2
+### 0.0.3 计划实现的功能
 - [ ] MMD 播放卡顿优化
 - [ ] 开放 API 接口
+- [ ] 缩放成图标
+
+### 后期计划实现的功能
+- [ ] 升级 Tauri v2
+- [ ] 多语言切换完善（系统托盘部分。在升级 Tauri v2 后才会做）
+- [ ] 适配安卓系统
 
 ## 适配计划
 Windows：Windows 11/10 。windows 10 之前的版本不会进行测试和适配，不保证能否运行。  
-Linux：~~Ubuntu 最新发布版（22.04）。其他的 Linux 发行版没有适配打算，Ubuntu 22.04 之前的版本不会进行测试和适配，不保证能否运行。~~ 最近要准备面试找班上了，暂时先鸽了。  
-MacOS：没有适配打算。我没有可用于开发和测试的 Mac 电脑，除非你送我一台。
+Linux 和 MacOS：我自己没有适配打算了。如果有人愿意支持的话，可以 PR。
 
 ## Build
 如果你想自己 build 的话。  
@@ -57,7 +60,9 @@ yarn
 
 yarn tauri dev
 ```
-Linux 和 MacOS 可能还需要一些依赖，可参考：[Tauri 官方文档](https://tauri.app/zh-cn/v1/guides/getting-started/prerequisites)
+Linux 和 MacOS 可能还需要一些依赖，可参考：[Tauri 官方文档](https://tauri.app/zh-cn/v1/guides/getting-started/prerequisites)    
+因为目前就我一个人开发，代码写得比较杂乱，东一榔头西一棒槌的，主打一个自己看得懂就行 :stuck_out_tongue_winking_eye: 。   
+所以不建议不懂 rust 的自行 build。
 
 ## 主要依赖
 Live2d：pixijs 和 pixi-live2d-display。   
@@ -65,8 +70,8 @@ MMD：babylonjs 和 babylon-mmd。
 
 ## 关于模型和动作
 **MMD**：  
-* 芙卡洛斯模型 ==> 作者：[给你柠檬椰果养乐多你会跟我玩吗](https://space.bilibili.com/32704665)，下载地址：[水神 芙卡洛斯](https://www.aplaybox.com/details/model/ZftsfJMVgQsx)
-* 丘丘摇动作 ==> 作者：[Ponx_迫奈熏](https://space.bilibili.com/345268724)，下载地址：[胡桃待机动作-丘丘摇](https://www.aplaybox.com/details/motion/HDLRono2SdAG)   
+* 芙卡洛斯模型 ==> 作者：原神 | [给你柠檬椰果养乐多你会跟我玩吗](https://space.bilibili.com/32704665)，下载地址：[水神 芙卡洛斯](https://www.aplaybox.com/details/model/ZftsfJMVgQsx)
+* 丘丘摇动作 ==> 作者：原神 | [Ponx_迫奈熏](https://space.bilibili.com/345268724)，下载地址：[胡桃待机动作-丘丘摇](https://www.aplaybox.com/details/motion/HDLRono2SdAG)   
 
 **模型和动作文件不为本项目所有。本项目对模型和动作的使用已征得作者同意，如果你要将模型和动作用在他处请遵守作者的使用要求。**    
 
