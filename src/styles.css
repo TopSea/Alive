@@ -1305,6 +1305,10 @@ select {
   height: 2.5rem;
 }
 
+.h-14 {
+  height: 3.5rem;
+}
+
 .h-16 {
   height: 4rem;
 }
@@ -1373,6 +1377,10 @@ select {
 .h-max {
   height: -moz-max-content;
   height: max-content;
+}
+
+.w-14 {
+  width: 3.5rem;
 }
 
 .w-16 {
