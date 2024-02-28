@@ -1,5 +1,6 @@
 import type { Engine } from "@babylonjs/core/Engines/engine";
 import type { Scene } from "@babylonjs/core/scene";
+import { UnlistenFn } from "@tauri-apps/api/event";
 
 export interface ISceneBuilder {
     build(canvas: HTMLCanvasElement, engine: Engine, aliveMmdOptions: AliveMmdOptions): Scene | Promise<Scene>;
@@ -16,6 +17,11 @@ export interface AliveMmdOptions {
     mmdCamera: boolean;
     paused: boolean;
     volume: number;
+    eventChangeCamera: UnlistenFn | null;
+    eventPauseAnimation: UnlistenFn | null;
+    eventMMDVoice: UnlistenFn | null;
+    eventMMDMotion: UnlistenFn | null;
+    eventMMDDancing: UnlistenFn | null;
 }
 
 export class BaseRuntime {
