@@ -54,7 +54,12 @@ export class SceneBuilder implements ISceneBuilder {
         mmdAliveUrl: "mmdAliveUrl",
         mmdCamera: true,
         paused: false,
-        volume: 0.8
+        volume: 0.8,
+        eventChangeCamera: null,
+        eventPauseAnimation: null,
+        eventMMDVoice: null,
+        eventMMDMotion: null,
+        eventMMDDancing: null,
     };
     private _aliveExtra: any = null;
     private _nextMotion: string = "";
@@ -409,7 +414,7 @@ export class SceneBuilder implements ISceneBuilder {
         // if you want to use inspector, uncomment following line.
         // Inspector.Show(scene, { });
 
-        await listen('event_change_camera', (_event: any) => {
+        this._options.eventChangeCamera = await listen('event_change_camera', (_event: any) => {
             console.log("event_change_camera");
             this._options.mmdCamera = !this._options.mmdCamera;
             if (this._options.mmdCamera) {
@@ -418,7 +423,7 @@ export class SceneBuilder implements ISceneBuilder {
                 scene.activeCamera = camera;
             }
         });
-        await listen('event_pause_animation', (event: any) => {
+        this._options.eventPauseAnimation = await listen('event_pause_animation', (event: any) => {
             const isPaused = event.payload as boolean
             this._options.paused = isPaused;
             console.log("event_pause_animation ", isPaused);
@@ -431,13 +436,13 @@ export class SceneBuilder implements ISceneBuilder {
                 this.animationLoop(animteLoop);
             }
         });
-        await listen('event_mmd_voice', (event: any) => {
+        this._options.eventMMDVoice = await listen('event_mmd_voice', (event: any) => {
             const volume = event.payload as number;
             this._options.volume = volume;
             audioPlayer.volume = volume;
             console.log("event_mmd_voice ", volume);
         });
-        await listen('change_mmd_motion', (event: any) => {
+        this._options.eventMMDMotion = await listen('change_mmd_motion', (event: any) => {
             const changeMotion = event.payload;
             const interrupt = changeMotion.interrupt;
             const filePath = changeMotion.uu_json;
@@ -497,7 +502,7 @@ export class SceneBuilder implements ISceneBuilder {
                 }
             }
         });
-        await listen('event_mmd_dancing', async (event: any) => {
+        this._options.eventMMDDancing = await listen('event_mmd_dancing', async (event: any) => {
             const dancing = event.payload as boolean;
 
             mmdRuntime.pauseAnimation();

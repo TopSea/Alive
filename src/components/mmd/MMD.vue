@@ -7,10 +7,10 @@ import { SceneBuilder } from "./MMDBuilder";
 import { onMounted, ref } from "vue";
 import {
   ArrowPathIcon, CameraIcon, PlayIcon, PauseIcon, Cog6ToothIcon, SpeakerWaveIcon, SpeakerXMarkIcon,
-  FilmIcon as DancingIcon, ArrowsPointingInIcon, 
+  FilmIcon as DancingIcon, ArrowsPointingInIcon,
 } from '@heroicons/vue/24/solid'
 import { FilmIcon } from '@heroicons/vue/24/outline'
-import { listen, emit as tauriEmit } from '@tauri-apps/api/event';
+import { UnlistenFn, listen, emit as tauriEmit } from '@tauri-apps/api/event';
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "tauri-plugin-store-api";
 import NumChange from "../NumChange.vue";
@@ -31,6 +31,9 @@ const isVolumeChanging = ref(false)
 const dancing = ref(false)
 const mmd_canvas = ref();
 const mmd_runtime = ref();
+var options: AliveMmdOptions|null = null;
+var eventMMDUrl: UnlistenFn|null = null;
+var eventChangeVolume: UnlistenFn|null = null;
 
 function reloadPage() {
   location.reload()
@@ -38,19 +41,19 @@ function reloadPage() {
 
 async function listenEvents() {
   console.log("listenEvents");
-  
-  await listen('event_mmd_url', (_event: any) => {
+
+  eventMMDUrl = await listen('event_mmd_url', (_event: any) => {
     console.log("event_model_url");
     reloadPage()
   });
-  await listen('change_mmd_volume', async (event: any) => {
+  eventChangeVolume = await listen('change_mmd_volume', async (event: any) => {
     console.log("event_model_url");
     var volume = event.payload.volume
     if (volume >= 1) {
       volume = 1
     } else if (volume <= 0) {
       volume = 0
-    } 
+    }
     sVolume.value = volume
     const filePath = event.payload.uu_json;
     writeTextFile(filePath, '{"mode":"mmd","volume":' + volume + '}')
@@ -104,10 +107,10 @@ onMounted(async () => {
   listenEvents()
   const mmdCanvas = mmd_canvas.value as HTMLCanvasElement
 
-  mmdCanvas.addEventListener('pointerdown', function(event) {
+  mmdCanvas.addEventListener('pointerdown', function (event) {
     event.stopPropagation();
     event.preventDefault();
-}, true);
+  }, true);
 
   const engine = new Engine(mmdCanvas, true, {
     preserveDrawingBuffer: false,
@@ -119,11 +122,16 @@ onMounted(async () => {
     audioEngine: false
   }, true);
 
-  const options: AliveMmdOptions = {
-      mmdAliveUrl: mmdAliveUrl,
-      mmdCamera: sMmdCamera.value,
-      paused: sPaused.value,
-      volume: sVolume.value
+  options = {
+    mmdAliveUrl: mmdAliveUrl,
+    mmdCamera: sMmdCamera.value,
+    paused: sPaused.value,
+    volume: sVolume.value,
+    eventChangeCamera: null,
+    eventPauseAnimation: null,
+    eventMMDVoice: null,
+    eventMMDMotion: null,
+    eventMMDDancing: null,
   }
 
   mmd_runtime.value = await BaseRuntime.Create({
@@ -137,13 +145,46 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   console.log("onBeforeUnmount");
+
+  // 注销监听的事件
+  if (options !== null) {
+    if (options.eventChangeCamera !== null) {
+      options.eventChangeCamera()
+      options.eventChangeCamera = null
+    }
+    if (options.eventMMDDancing !== null) {
+      options.eventMMDDancing()
+      options.eventMMDDancing = null
+    }
+    if (options.eventMMDMotion !== null) {
+      options.eventMMDMotion()
+      options.eventMMDMotion = null
+    }
+    if (options.eventMMDVoice !== null) {
+      options.eventMMDVoice()
+      options.eventMMDVoice = null
+    }
+    if (options.eventPauseAnimation !== null) {
+      options.eventPauseAnimation()
+      options.eventPauseAnimation = null
+    }
+  }
+  if (eventMMDUrl !== null) {
+    eventMMDUrl()
+    eventMMDUrl = null
+  }
+  if (eventChangeVolume !== null) {
+    eventChangeVolume()
+    eventChangeVolume = null
+  }
+
   if (mmd_runtime.value !== null) {
     mmd_runtime.value.dispose()
   }
 })
 onUnmounted(() => {
   console.log("onUnmounted");
-  
+
 })
 </script>
 
@@ -154,35 +195,37 @@ onUnmounted(() => {
     <ul data-tauri-drag-region
       class=" invisible group-hover/menu-mmd:visible absolute flex flex-col inset-y-0 right-0 mx-4 my-4 py-4 px-2 space-y-4 backdrop-blur-3xl bg-alive-active/30 dark:bg-alive-actived/30">
       <li class="w-8 h-8" @click="reloadPage">
-        <ArrowPathIcon :class="[txt,txtHover,'w-8 h-8']" />
+        <ArrowPathIcon :class="[txt, txtHover, 'w-8 h-8']" />
       </li>
       <li class="w-8 h-8" @click="changeCamera">
-        <CameraIcon :class="[txt,txtHover,'w-8 h-8']" />
+        <CameraIcon :class="[txt, txtHover, 'w-8 h-8']" />
       </li>
-      
+
       <li class="w-8 h-8">
-        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0" :class="['text-alive-txthd brightness-120 w-8 h-8 blur-sm']" />
-        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0" :class="['text-alive-txthd brightness-120 w-8 h-8 blur-sm']" />
-        <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }" 
-          :class="isVolumeChanging ? [txtHover,'text-alive-txth dark:text-alive-txthd w-8 h-8 relative -top-8 ']:[txt,txtHover,'w-8 h-8']" />
+        <SpeakerWaveIcon v-if="isVolumeChanging && sVolume > 0"
+          :class="['text-alive-txthd brightness-120 w-8 h-8 blur-sm']" />
+        <SpeakerXMarkIcon v-else-if="isVolumeChanging && sVolume <= 0"
+          :class="['text-alive-txthd brightness-120 w-8 h-8 blur-sm']" />
+        <SpeakerWaveIcon v-if="sVolume > 0" @click="() => { isVolumeChanging = !isVolumeChanging }"
+          :class="isVolumeChanging ? [txtHover, 'text-alive-txth dark:text-alive-txthd w-8 h-8 relative -top-8 '] : [txt, txtHover, 'w-8 h-8']" />
         <SpeakerXMarkIcon v-else @click="() => { isVolumeChanging = !isVolumeChanging }"
-          :class="isVolumeChanging ? [txtHover,'text-alive-txth dark:text-alive-txthd w-8 h-8 relative -top-8 ']:[txt,txtHover,'w-8 h-8']" />
+          :class="isVolumeChanging ? [txtHover, 'text-alive-txth dark:text-alive-txthd w-8 h-8 relative -top-8 '] : [txt, txtHover, 'w-8 h-8']" />
         <NumChange v-if="isVolumeChanging" :posTop="112" @minus-event="() => { changeModelVoice(false) }"
           @plus-event="() => { changeModelVoice(true) }" />
       </li>
       <li class="w-8 h-8" @click="pauseAnimation">
-        <PauseIcon v-if="!sPaused" :class="[txt,txtHover,'w-8 h-8']" />
-        <PlayIcon v-else :class="[txt,txtHover,'w-8 h-8']" />
+        <PauseIcon v-if="!sPaused" :class="[txt, txtHover, 'w-8 h-8']" />
+        <PlayIcon v-else :class="[txt, txtHover, 'w-8 h-8']" />
       </li>
       <li class="w-8 h-8" @click="mmdDancing">
-        <FilmIcon :class="[txt,txtHover,'w-8 h-8']" v-if="!dancing" />
-        <DancingIcon :class="[txt,txtHover,'w-8 h-8']" v-else />
+        <FilmIcon :class="[txt, txtHover, 'w-8 h-8']" v-if="!dancing" />
+        <DancingIcon :class="[txt, txtHover, 'w-8 h-8']" v-else />
       </li>
       <li class="w-8 h-8" @click="openSettings">
-        <Cog6ToothIcon :class="[txt,txtHover,'w-8 h-8']" />
+        <Cog6ToothIcon :class="[txt, txtHover, 'w-8 h-8']" />
       </li>
       <li class="w-8 h-8" @click="minify">
-        <ArrowsPointingInIcon :class="[txt,txtHover,'w-8 h-8']" />
+        <ArrowsPointingInIcon :class="[txt, txtHover, 'w-8 h-8']" />
       </li>
     </ul>
   </div>
