@@ -2,9 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use axum::{
-    body::Body, extract::State, http::{response, StatusCode}, response::{IntoResponse, Response}, routing::{get, post}, Json, Router
+    extract::State, http::StatusCode, response::{IntoResponse, Response}, routing::{get, post}, Json, Router
 };
-use serde::{de, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::{fs::File, io::Read, sync::OnceLock};
 use tauri::{
     AppHandle, CustomMenuItem, Manager, PhysicalPosition, PhysicalSize, Position, Size, SystemTray,
@@ -29,6 +29,12 @@ struct ChangeMotion {
 struct ChangeVolume {
     mode: String,
     volume: f32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    uu_json: Option<String>,
+}
+#[derive(Clone, Serialize, Deserialize)]
+struct MinifyAlive {
+    minify: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     uu_json: Option<String>,
 }
@@ -153,6 +159,24 @@ async fn change_volume(
     return wait_response(&file_path).await;
 }
 
+async fn minify_alive(
+    State(app_handler): State<AppHandle>,
+    Json(payload): Json<MinifyAlive>,
+) -> Response {
+    let minify = payload.minify;
+    println!("Minify Alive: {}.", &minify);
+
+    let file_path = create_temp_file();
+
+    let request_minify: MinifyAlive = MinifyAlive {
+        minify: minify,
+        uu_json: Some(file_path.to_string()),
+    };
+    _ = app_handler.emit_to("main", "minify_alive", request_minify);
+
+    return wait_response(&file_path).await;
+}
+
 async fn start_http_server(app: AppHandle) {
     // build our application with a route
     let app = Router::new()
@@ -160,6 +184,7 @@ async fn start_http_server(app: AppHandle) {
         .route("/", get(hello_alive))
         .route("/change/motion", post(change_motion))
         .route("/change/volume", post(change_volume))
+        .route("/change/minify", post(minify_alive))
         .with_state(app);
 
     // run our app with hyper
