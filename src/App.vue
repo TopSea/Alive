@@ -9,6 +9,7 @@ import { onUnmounted } from "vue";
 import { checkAliveUpdate } from "./components/updater/updater";
 import { useRouter } from 'vue-router'
 import { currentMonitor } from '@tauri-apps/api/window';
+import { writeTextFile } from "@tauri-apps/api/fs";
 
 const router = useRouter()
 var settingsOpened = false
@@ -67,8 +68,30 @@ async function listenEvents() {
   await listen('event_open_settings', (_event: any) => {
     openSettings()
   });
-  await listen('minify', (_event: any) => {
-    changeMode("/")
+  await listen('minify_alive', (event: any) => {
+    const minify = event.payload
+    const mode = isMMD.value?'mmd':'live2d'
+    console.log("mode:", mode);
+    
+    if (minify.minify) {
+      changeMode("/")
+      if (minify.uu_json) {
+        const filePath = minify.uu_json;
+        writeTextFile(
+          filePath, 
+          '{"mode":"' + mode + '","minified":' + true + '}'
+        )
+      }
+    } else {
+      if (minify.uu_json) {
+        const filePath = minify.uu_json;
+        writeTextFile(
+          filePath, 
+          '{"mode":"' + mode + '","minified":' + false + '}'
+        )
+      }
+      unminify()
+    }
   });
   await listen('hello_alive', (_event: any) => {
     console.log("Hello from client.");

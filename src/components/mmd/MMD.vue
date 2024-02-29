@@ -81,7 +81,7 @@ async function openSettings() {
   await tauriEmit('event_open_settings', true);
 }
 async function minify() {
-  await tauriEmit('minify', true);
+  await tauriEmit('minify_alive', { minify: true });
 }
 async function changeModelVoice(isAdding: boolean) {
   if (isAdding) {

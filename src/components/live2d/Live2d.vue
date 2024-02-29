@@ -84,7 +84,7 @@ function reloadPage() {
 }
 
 async function minify() {
-  await tauriEmit('minify', true);
+  await tauriEmit('minify_alive', { minify: true });
 }
 
 async function openSettings() {
