@@ -5,9 +5,9 @@
     "auto_check": false,
     "language": "zh_CN",
     "display_mode": "follow",
-    "is_mmd": true,
+    "is_mmd": false,
     "win_h": 650,
-    "win_w": 800,
+    "win_w": 100,
     "pos_y": 64,
     "pos_x": 64
 }
