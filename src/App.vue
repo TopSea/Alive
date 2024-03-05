@@ -3,13 +3,13 @@ import { onBeforeMount, onMounted, ref } from "vue";
 import { UnlistenFn, listen } from "@tauri-apps/api/event";
 import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "@tauri-apps/plugin-store";
-import { PhysicalPosition, PhysicalSize, getCurrent, Window } from "@tauri-apps/api/window";
+import { PhysicalPosition, PhysicalSize, Window, currentMonitor } from "@tauri-apps/api/window";
 import { changeDisplayMode, } from "./theme/theme";
 import { onUnmounted } from "vue";
 import { checkAliveUpdate } from "./components/updater/updater";
 import { useRouter } from 'vue-router'
-import { currentMonitor } from '@tauri-apps/api/window';
-import { writeTextFile } from "@tauri-apps/api/fs";
+import { writeTextFile } from "@tauri-apps/plugin-fs";
+import { WebviewWindow, getCurrent } from "@tauri-apps/api/webview";
 
 const router = useRouter()
 var settingsOpened = false
@@ -22,7 +22,7 @@ var unlistenUpdate: UnlistenFn | null = null;
 var appWindow: Window| null = null;
 
 async function initSettings() {
-  appWindow = await getCurrent()
+  appWindow = getCurrent().window;
   const resourceDirPath = await resourceDir();
   const path = await join(resourceDirPath, 'data', 'sets_alive.json');
   console.log("path: ", path);
@@ -104,7 +104,7 @@ async function listenEvents() {
     const motion = event.payload;
     // 先只做 MMD 吧
     if (isMMD.value && motion.mode === "mmd") {
-      await appWindow.emit("change_mmd_motion", motion)
+      await appWindow!.emit("change_mmd_motion", motion)
     }
   });
   await listen('change_volume', async (event: any) => {
@@ -113,7 +113,7 @@ async function listenEvents() {
     
     // 先只做 MMD 吧
     if (isMMD.value && volume.mode === "mmd") {
-      await appWindow.emit("change_mmd_volume", volume)
+      await appWindow!.emit("change_mmd_volume", volume)
     }
   });
 }
@@ -125,7 +125,7 @@ function openSettings() {
     settingsWindow?.unminimize();
     settingsWindow?.setFocus();
   } else {
-    const settingsWindow = new Window('tauri_win_settings', {
+    const settingsWindow = new WebviewWindow('tauri_win_settings', {
       url: '/pages/settings.html',
       x: 64,
       y: 64,
@@ -154,18 +154,18 @@ function unminify() {
 async function changeMode(mode: string) {
   if (mode === "/") {
     minified.value = true
-    appWindow.setResizable(false)
+    appWindow!.setResizable(false)
     if (isMMD.value) {
-      appWindow.setSize(new PhysicalSize(75, 75))
+      appWindow!.setSize(new PhysicalSize(75, 75))
     } else {
-      appWindow.setSize(new PhysicalSize(75, 75))
+      appWindow!.setSize(new PhysicalSize(75, 75))
     }
     router.push(mode)
   } else {
     minified.value = false
     const width = await store.value.get("win_w") as number
     const height = await store.value.get("win_h") as number
-    const pos = await appWindow.outerPosition()
+    const pos = await appWindow!.outerPosition()
     var posX = pos.x
     var posY = pos.y
 
@@ -181,14 +181,14 @@ async function changeMode(mode: string) {
         posY = pos.y + 75 - height
       }
       
-      const p2 = await appWindow.innerPosition()
+      const p2 = await appWindow!.innerPosition()
       console.log("screenSize: ", screenSize);
       console.log("p1: ", pos);
       console.log("p2: ", p2);
       
-      appWindow.setResizable(true)
-      appWindow.setPosition(new PhysicalPosition(posX, posY))
-      appWindow.setSize(new PhysicalSize(width, height))
+      appWindow!.setResizable(true)
+      appWindow!.setPosition(new PhysicalPosition(posX, posY))
+      appWindow!.setSize(new PhysicalSize(width, height))
       router.push({
         name: mode
       })
@@ -197,9 +197,9 @@ async function changeMode(mode: string) {
 }
 
 onBeforeMount(() => {
-  appWindow.setSize(new PhysicalSize(75, 75))
-  appWindow.setResizable(false)
   initSettings()
+  appWindow!.setSize(new PhysicalSize(75, 75))
+  appWindow!.setResizable(false)
 })
 
 onMounted(() => {

@@ -15,7 +15,7 @@ import { join, resourceDir } from "@tauri-apps/api/path";
 import { Store } from "@tauri-apps/plugin-store";
 import NumChange from "../NumChange.vue";
 import { txt, txtHover } from "../../theme/color";
-import { writeTextFile } from '@tauri-apps/api/fs';
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { onBeforeUnmount } from "vue";
 import { onUnmounted } from "vue";
 

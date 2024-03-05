@@ -42,7 +42,7 @@ import type { ISceneBuilder, AliveMmdOptions } from "./MMDRuntime";
 import { listen } from "@tauri-apps/api/event";
 import { MmdModel } from "babylon-mmd/esm/Runtime/mmdModel";
 import { parallelLoadAsync } from "./parallelLoadAsync";
-import { writeTextFile } from '@tauri-apps/api/fs';
+import { writeTextFile } from "@tauri-apps/plugin-fs";
 
 type InAnimationLoop = (mmdDancing: boolean) => void;
 

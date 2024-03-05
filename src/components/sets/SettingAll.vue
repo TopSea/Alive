@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Store } from "@tauri-apps/plugin-store";
 import { join, resourceDir } from "@tauri-apps/api/path";
-import { enable, disable } from "tauri-plugin-autostart-api";
-import { WebviewWindow, appWindow } from '@tauri-apps/api/window';
+import { enable, disable } from "@tauri-apps/plugin-autostart";
+import { WebviewWindow, getCurrent } from "@tauri-apps/api/webview";
 import { Ref, onBeforeMount, ref, onUnmounted } from "vue";
 import {
   CursorArrowRaysIcon, ArrowUpTrayIcon, RocketLaunchIcon, ArrowDownOnSquareStackIcon, InformationCircleIcon, LanguageIcon
@@ -11,7 +11,7 @@ import {
   MoonIcon, SunIcon
 } from '@heroicons/vue/24/solid'
 import { useI18n } from 'vue-i18n'
-import { FileEntry, readDir } from "@tauri-apps/api/fs";
+import { FileEntry, readDir } from "@tauri-apps/plugin-fs";
 import { getName } from "@tauri-apps/api/app";
 import { txt, input, txtHover, bg, bgActive, bgInactive, alphaIcon, alphaTxt, betaIcon, betaTxt, } from "../../theme/color";
 import { changeDisplayMode, } from "../../theme/theme";
@@ -21,6 +21,7 @@ import SettingModels from "./SettingModels.vue";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { checkAliveUpdate } from "../updater/updater";
 
+const appWindow = getCurrent().window;
 const aliveVersion = '0.0.1-beta';
 const aliveAppName = ref(await getName());
 // const tauriVersion = ref(await getTauriVersion());
