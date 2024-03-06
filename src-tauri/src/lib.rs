@@ -207,6 +207,7 @@ pub fn run() {
             let main_window = app.get_webview_window("main");
 
             let window = main_window.unwrap();
+            _ = window.set_decorations(false);
             let _ = window.set_skip_taskbar(true);
 
             // 读取并设置窗口大小和位置的信息
