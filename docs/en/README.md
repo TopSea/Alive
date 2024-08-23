@@ -36,7 +36,7 @@ Tauri version please refer to this video: [https://www.bilibili.com/video/BV1B64
 - [x] Automatic check for updates
 - [x] Zoom into an icon
 
-### 0.0.3 planned implemented functions
+### 0.1.0 planned implemented functions
 - [ ] AI chat function
 
 ## Adaptation plan
