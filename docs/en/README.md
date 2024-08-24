@@ -16,18 +16,18 @@
 </div>
 
 ## Development Progress
-Tauri version 0.0.2 has been released! Development of the Tauri version will be discontinued henceforth.   
+Tauri version 0.0.3 has been released! Development of the Tauri version will be discontinued henceforth.   
 Electron version is under active development.   
 Follow me ([GoAHi](https://space.bilibili.com/307219768)), To get release information more quickly.
 
 ## Installation and Use
-The last supported version of Live2d is: [Alive v0.0.2]()    
+The last supported version of Live2d is: [Alive v0.0.3](https://github.com/TopSea/Alive/releases/tag/v0.0.3)    
 Tauri version please refer to this video: [https://www.bilibili.com/video/BV1B6421g7p9/](https://www.bilibili.com/video/BV1B6421g7p9/)      
 **Regarding the writing standards for alive_mmd.json : [About .alive_mmd.json](./alive_mmd.md) 。**
 
 ## Function implementation plan
 ### The implemented functions
-- [x] The display and interactive operation of Live2d and MMD model (The last supported version of Live2d is: [Alive v0.0.2]())
+- [x] The display and interactive operation of Live2d and MMD model (The last supported version of Live2d is: [Alive v0.0.3](https://github.com/TopSea/Alive/releases/tag/v0.0.3))
 - [x] Mouse click through
 - [x] Save the position and size of the window
 - [x] Multilingual switching (window part)

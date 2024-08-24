@@ -18,18 +18,18 @@
 ## [Englisg Doc](./docs/en/README.md)
 
 ## 开发进度
-Tauri 0.0.2 版已发布！之后 Tauri 版将停止开发。   
+Tauri 0.0.3 版已发布！之后 Tauri 版将停止开发。   
 Electron 版全力开发中。   
 关注我（[GoAHi](https://space.bilibili.com/307219768)），更快获得发布信息。
 
 ## 安装使用
-Live2d 最后的支持版本是：[Alive v0.0.2]()    
+Live2d 最后的支持版本是：[Alive v0.0.3](https://github.com/TopSea/Alive/releases/tag/v0.0.3)    
 Tauri 版参考这个视频：[https://www.bilibili.com/video/BV1B6421g7p9/](https://www.bilibili.com/video/BV1B6421g7p9/)      
 **关于 alive_mmd.json 的编写规范：[关于 .alive_mmd.json](./docs/alive_mmd.md) 。**
 
 ## 功能实现计划
 ### 已实现的功能
-- [x] Live2d 和 MMD 模型的展示和交互操作（Live2d 最后的支持版本是：[Alive v0.0.2]()）
+- [x] Live2d 和 MMD 模型的展示和交互操作（Live2d 最后的支持版本是：[Alive v0.0.3](https://github.com/TopSea/Alive/releases/tag/v0.0.3)）
 - [x] 鼠标点击穿透
 - [x] 保存窗口的位置和大小
 - [x] 多语言切换（窗口部分）
