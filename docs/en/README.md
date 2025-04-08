@@ -3,7 +3,7 @@
 <img style="width: 156px; height: 156px; border-radius: 12px;" src="../../assets/app-icon.png" alt="App Icon"/></a>
 <br>
 <br>
-<i>Alive: Open-source desktop pet software support for Live2D and MMD models.</i>
+<i>Alive: Free self-hosted AI desktop pet app.</i>
 <br>
 <br>
 <a href="https://github.com/TopSea/Alive/stargazers"><img src="https://img.shields.io/github/stars/TopSea/Alive" alt="Stars Badge"/></a>
