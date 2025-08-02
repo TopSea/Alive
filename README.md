@@ -1,34 +1,24 @@
 
 <div align="center" style="display: flex; flex-direction: column; align-items: center;">
-<img style="width: 156px; height: 156px; border-radius: 12px;" src="./assets/app-icon.png" alt="App Icon"/></a>
+<img style="width: 156px; height: 156px; border-radius: 12px;" src="./assets/app-icon-rounded.png" alt="App Icon"/></a>
 <br>
 <br>
-<i>Alive：支持私有化部署 AI 的 3D 桌宠软件。</i>
+<i>Alive：一个跨平台且可以本地部署 AI 服务的桌宠软件。</i>
 <br>
 <br>
 <a href="https://github.com/TopSea/Alive/stargazers"><img src="https://img.shields.io/github/stars/TopSea/Alive" alt="Stars Badge"/></a>
 <a href="https://github.com/TopSea/Alive/releases"><img src="https://img.shields.io/github/downloads/TopSea/Alive/total" alt="Download Badge"/></a>
 </div>
 
-## [Englisg Doc](./docs/en/README.md)
+## [English](./docs/en/README.md)
 
-## 开发进度
-下载 [Alive] ，快来领取你的桌宠吧！   
-关注我（[GoAHi](https://space.bilibili.com/307219768)），更快获得发布信息。    
-**软件现在很多细节没有完善，使用如果遇到问题或者有什么建议，可以反馈给我，我会尽力修改的。**
+[**软件使用文档**](https://topsea.github.io/alive)
 
-## 安装使用
-在发布页下载对应平台的安装包，记得同时下载桌宠模型压缩包。    
-安装完后，在设置选择打开桌宠模型压缩包，然后选择对应的模型即可。     
+
+## 功能 ChangeLog
 
 *Live2d 最后的支持版本是：[Alive v0.0.3](https://github.com/TopSea/Alive/releases/tag/v0.0.3)*    
 **只有 Alive v1.0.0 及之后的版本有 AI 功能。**     
-
-## 适配计划
-Windows：目前只有 Windows 11 经过了测试。Windows 10 及之前的版本不保证能否运行。  
-安卓：Android 7+。
-
-## 功能 ChangeLog
 ### 1.3.0 
 1. 新增加载和选择大语言模型功能；
 2. 新增自定义场景剧本功能；
@@ -65,7 +55,6 @@ Windows：目前只有 Windows 11 经过了测试。Windows 10 及之前的版�
 
 
 
-[app-icon]: ./assets/app-icon.png
 [Alive]: https://github.com/TopSea/Alive/releases/
 [AliveAi]: https://github.com/TopSea/AliveAi
 [Live2d-Tauri]: https://github.com/TopSea/Live2d-Tauri

@@ -1,62 +1,60 @@
-# 关于 .alive_mmd.json
-**因为 mmd 没有现成可用的动作播放和循环逻辑，所以只能我自己写一个了。**
 
-## .alive_mmd.json 样例
-```
-{
-    "what_is_this_file": "A specification file for Alive to play mmd motions",
-    "mmd_model": "芙卡洛斯.pmx",
-    "default_bg": [],
-    "alive_motions": [
-        {
-            "motion_name": "pose1",
-            "motions": [
-                "../motion/丘丘摇/丘丘摇.vmd",
-                "../motion/丘丘摇/丘丘摇-相机.vmd"
-            ],
-            "bgm": "../motion/丘丘摇/丘丘摇.wav",
-            "extra": {
-                "e_model": "",
-                "e_motions": []
-            }
-        }
-    ],
-    "pose_motions": [
-        "pose1"
-    ],
-    "dance_motions": [
-        "pose1"
-    ],
-    "interval": 500
-}
-```
+<div align="center" style="display: flex; flex-direction: column; align-items: center;">
+<img style="width: 156px; height: 156px; border-radius: 12px;" src="../../assets/app-icon-rounded.png" alt="App Icon"/></a>
+<br>
+<br>
+<i>Alive：A cross-platform desktop pet software with self-hosted AI services.</i>
+<br>
+<br>
+<a href="https://github.com/TopSea/Alive/stargazers"><img src="https://img.shields.io/github/stars/TopSea/Alive" alt="Stars Badge"/></a>
+<a href="https://github.com/TopSea/Alive/releases"><img src="https://img.shields.io/github/downloads/TopSea/Alive/total" alt="Download Badge"/></a>
+</div>
 
-## 属性解释
-` mmd_model `：播放动作的 mmd 模型，一般就是你的人物模型，只支持 pmx 格式。**此属性必须存在且不能留空。**    
+## [中文](./docs/en/README.md)
 
-` default_bg `：可添加的背景模型，可以添加 0 个或多个背景模型，只支持 pmx 格式。**此属性必须存在，可以留空。**   
+[**Software Guide**](https://topsea.github.io/alive)
 
-` alive_motions `：Alive mmd 的动作格式，可以添加 1 个或多个动作。**此属性必须存在且不能留空。**
-- ` motion_name `：Alive mmd 动作的名称。**此属性必须存在且不能留空。**
-- ` motions `：Alive mmd 动作的动作文件，可以包含姿态动作、脸部表情动作和相机动作，只支持 vmd 格式。**此属性必须存在且不能留空。请一定要包含相机动作，不然更换动作后，相机的展示位置会出问题。**
-- ` bgm `：Alive mmd 动作的背景音乐，支持 mp3 和 wav 格式。**此属性必须存在且不应留空。如果没有背景音乐文件，动作的播放会卡、卡、卡、卡、卡...**    
-- ` extra `：Alive mmd 动作的附加模型和附加模型的动作。**此属性必须存在且不能留空。**
-    - ` e_model `：Alive mmd 动作的附加模型，只支持 pmx 格式。**此属性必须存在，可以留空。**    
-    - ` e_motions `：Alive mmd 动作的附加模型的动作文件，只支持 vmd 格式。**此属性必须存在，如果 e_model 不为空，则此处也不应为空。**   
-  
-` pose_motions `：Alive mmd 动作的默认动作名称组，其中的值必须声明在 alive_motions 的 motion_name 中。**此属性必须存在且不能留空。**    
 
-` dance_motions `：Alive mmd 动作的舞蹈动作名称组，其中的值必须声明在 alive_motions 的 motion_name 中。**此属性必须存在且不应留空。**    
+## Features ChangeLog
 
-` interval `：Alive mmd 动作播放结束后停留的时间。**此属性必须存在且不能留空。**    
+*The last Live2d supported version is[Alive v0.0.3](https://github.com/TopSea/Alive/releases/tag/v0.0.3)*    
+**AI services only available after Alive v1.0.0 .**     
+### 1.3.0 
+1. 新增加载和选择大语言模型功能；
+2. 新增自定义场景剧本功能；
+3. 桌宠页面新增选择展示背景图片功能；
+4. 桌宠页面刷新加载方式优化；
+5. 聊天信息展示新增展开和压缩页面功能；
+6. 修复输入法遮挡 bug。
+### 1.2.0 
+1. 新的动作切换方法，动作之间切换更加丝滑；
+2. 添加了和桌宠的点击互动；
+3. 跳过任务栏图标，不再占用任务栏空间；
+4. 新增对文本情绪做出反馈，表情动作更丰富；
+5. 修复系统托盘按钮点击无效问题；
+6. 修复切换桌宠模型时有概率闪退问题。
 
-## 附加说明
-- Alive 只会播放名字存放在 ` pose_motions ` 和 ` dance_motions ` 中的动作。播放方式为随机。你可以把你喜欢的动作多添加几次，手动提高概率。    
+### 1.1.0
+1. 切换模型后同时切换唤醒词；
+2. 添加 AI 服务重连方法。
 
-- ` extra ` 中的动作不支持 ` 外亲骨骼 ` ，需要 k 出所有关键帧。
 
-- 目前 Alive 没有包含对 .alive_mmd.json 的合法性检查，没有遵守上面的提示的话就可能啥也没有，也没有提示。    
 
-- 除 ` mmd_model ` 外其他的文件都支持相对路径。只要你的文件还在应用的 ` /mmd/ ` 下，随便你放哪都行。    
+## 使用须知
+软件中的模型不属于本软件，具体信息可在对应的模型设置中查看。  
+用户可以自行更换展示的模型，本软件不对模型的展示效果和内容负责。    
+用户可以连接自行部署的AI服务器，用户自行部署的 AI 服务器的稳定性和安全性由用户自行负责。    
+用户自行部署的 AI 服务器与本软件之间的连接和交互应符合本软件的接口规范和要求。因用户自行部署的 AI 服务器不符合规范而导致的本软件无法正常使用或其他问题，由用户自行解决。    
+软件中的文本及语音信息内容由 AI 生成，无法确保真实准确，仅供参考。     
+   
 
-- 除 ` interval ` 外，你要修改的值都应该是字符串类型的。
+## 关于项目
+*最开始是用 Tauri 和 React 写的（[Live2d-Tauri]），但是写的不是很好。就打算用 vue 再再造个轮子顺便也让我在原神中的老婆们能展示展示，所以 Alive 就诞生了。*    
+
+*因为一些原因，项目代码不再开源，已开源的代码不再维护。*
+
+
+
+[Alive]: https://github.com/TopSea/Alive/releases/
+[AliveAi]: https://github.com/TopSea/AliveAi
+[Live2d-Tauri]: https://github.com/TopSea/Live2d-Tauri
