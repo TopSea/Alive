@@ -6,6 +6,10 @@
     "windows-x86_64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWjlYL040Zk9BY1hGR1Flc0ZCd09RU0llUU9pa01TVDlyYVovRGtLZzMzNlBpYUNwOHFkaDlLVkxiRGRFT0phUHE1aUpkcE51WTFlZjdnODJiYUhGZE9BTFhpeWdzK3dnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzA3MTM1Njk5CWZpbGU6QWxpdmVfMC4wLjJfeDY0LXNldHVwLm5zaXMuemlwCkxBKzlnS1gvUi9pNTZMYTliME5IVHlhKzdGVjJQcThiYURjY2pDaFBjb0FpSzVSNDh4MW1SdXBHZGw1RTh5OVN0K0hjL0hWUUdha3kxcUU2K1Fqc0J3PT0K",
       "url": "https://github.com/TopSea/Alive/releases/download/v0.0.1-beta/Alive_0.0.2_x64-setup.nsis.zip"
+    },
+    "android": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVRWjlYL040Zk9BY1hGR1Flc0ZCd09RU0llUU9pa01TVDlyYVovRGtLZzMzNlBpYUNwOHFkaDlLVkxiRGRFT0phUHE1aUpkcE51WTFlZjdnODJiYUhGZE9BTFhpeWdzK3dnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzA3MTM1Njk5CWZpbGU6QWxpdmVfMC4wLjJfeDY0LXNldHVwLm5zaXMuemlwCkxBKzlnS1gvUi9pNTZMYTliME5IVHlhKzdGVjJQcThiYURjY2pDaFBjb0FpSzVSNDh4MW1SdXBHZGw1RTh5OVN0K0hjL0hWUUdha3kxcUU2K1Fqc0J3PT0K",
+      "url": "https://github.com/TopSea/Alive/releases/download/v2.5.0/alive_default.v2.5.1.apk"
     }
   }
 }
